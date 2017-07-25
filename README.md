@@ -1,0 +1,4 @@
+# Depedencys
+- mongodb
+- npm
+- nodejs
