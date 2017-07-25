@@ -4,7 +4,7 @@
   "description": "A central for the laboratory of the future :)",
   "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon main.js"
   },
   "author": "Malte Bargholz",
