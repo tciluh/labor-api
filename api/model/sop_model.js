@@ -11,6 +11,4 @@ let SOPSchema = new Mongoose.Schema({
 //compile the model into a usable class
 let SOPObject = Mongoose.model('SOP', SOPSchema);
 
-module.exports = {
-    SOP: SOPObject //export the SOPObject as SOP to including classes
-}
+module.exports = SOPObject;
