@@ -1,14 +1,91 @@
 'use strict;' //use strict mode. see main.js
 
-//mongoose import
-let Mongoose = require('mongoose');
+//sequelize import
+const Sequelize = require('sequelize');
 
-//define a schema for an SOP Object inside MongoDB
-let SOPSchema = new Mongoose.Schema({
+//init db connection
+const db = new Sequelize('sop', 'sop_user', null, {
+    host: 'localhost',
+    dialect: 'sqlite',
+    storage: 'sop.sqlite'
+});
+
+db.authenticate().then(() => console.log("db connection succesful"));
+
+
+const Protocol = db.define('protocol', {
+        protocolID: {
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            primaryKey: true,
+            autoIncrement: true,
+        },
+        name: {
+            type: Sequelize.STRING,
+            allowNull: false,
+        },
+        description: {
+            type: Sequelize.TEXT,
+            allowNull: false
+        }
+});
+
+const Instruction = db.define('instruction', {
+    instructionID: {
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            primaryKey: true,
+            autoIncrement: true,
+    },
+    description: {
+        type: Sequelize.TEXT,
+        allowNull: false,
+    }
+});
+
+const Result = db.define('result', {
+    resultID: {
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            primaryKey: true,
+            autoIncrement: true,
+    },
+    description: {
+        type: Sequelize.TEXT,
+        allowNull: false,
+    }
+});
+
+Result.hasOne(Instruction, { as: 'NextInstruction' });
+Result.belongsTo(Instruction, { as: 'originInstruction' })
+
+
+const User = db.define('user', {
+        userID: {
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            primaryKey: true,
+            autoIncrement: true,
+        },
+        firstName: {
+            type: Sequelize.STRING,
+            allowNull: false,
+        },
+        lastName: {
+            type: Sequelize.STRING,
+            allowNull: false,
+        }
+        email: {
+            type: Sequelize.STRING,
+            allowNull: false,
+        }
+});
+
+const LogEntry = db.define('logentry', {
+
+
 
 });
 
-//compile the model into a usable class
-let SOPObject = Mongoose.model('SOP', SOPSchema);
+module.exports = User;
 
-module.exports = SOPObject;
