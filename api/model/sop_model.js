@@ -14,7 +14,7 @@ db.authenticate().then(() => console.log("db connection succesful"));
 
 
 const Protocol = db.define('protocol', {
-        protocolID: {
+        id: {
             type: Sequelize.INTEGER,
             allowNull: false,
             primaryKey: true,
@@ -30,8 +30,10 @@ const Protocol = db.define('protocol', {
         }
 });
 
+Protocol.hasOne(Instruction, { as: 'firstInstruction'} );
+
 const Instruction = db.define('instruction', {
-    instructionID: {
+    id: {
             type: Sequelize.INTEGER,
             allowNull: false,
             primaryKey: true,
@@ -43,8 +45,10 @@ const Instruction = db.define('instruction', {
     }
 });
 
+Instruction.hasMany(Result, { as: 'Results'} );
+
 const Result = db.define('result', {
-    resultID: {
+    id: {
             type: Sequelize.INTEGER,
             allowNull: false,
             primaryKey: true,
@@ -61,7 +65,7 @@ Result.belongsTo(Instruction, { as: 'originInstruction' })
 
 
 const User = db.define('user', {
-        userID: {
+        id: {
             type: Sequelize.INTEGER,
             allowNull: false,
             primaryKey: true,
