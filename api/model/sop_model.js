@@ -89,6 +89,8 @@ const User = db.define('user', {
 Protocol.hasOne(Instruction, { as: 'firstInstruction'} );
 //each instruction has one or more results
 Instruction.hasMany(Result, { as: 'results'} );
+//or it has a nextInstruction when the result is unambigous
+Instruction.hasOne(Instruction, { as: 'nextInstruction', constraints: false, allowNull: true})
 //each result has a resulting instruction
 Result.hasOne(Instruction, { as: 'nextInstruction', constraints: false});
 //each result belongs to a instruction which lead to the result.
