@@ -10,8 +10,6 @@ const db = new Sequelize('sop', 'sop_user', null, {
     storage: 'sop.sqlite'
 });
 
-db.authenticate().then(() => console.log("db connection succesful"));
-
 
 const Protocol = db.define('protocol', {
         id: {
@@ -45,7 +43,7 @@ const Instruction = db.define('instruction', {
     }
 });
 
-Instruction.hasMany(Result, { as: 'Results'} );
+Instruction.hasMany(Result, { as: 'results'} );
 
 const Result = db.define('result', {
     id: {
@@ -60,9 +58,8 @@ const Result = db.define('result', {
     }
 });
 
-Result.hasOne(Instruction, { as: 'NextInstruction' });
+Result.hasOne(Instruction, { as: 'nextInstruction' });
 Result.belongsTo(Instruction, { as: 'originInstruction' })
-
 
 const User = db.define('user', {
         id: {
@@ -85,11 +82,16 @@ const User = db.define('user', {
         }
 });
 
-const LogEntry = db.define('logentry', {
+db.authenticate().then(() => console.log("db connection succesful"));
+db.sync()
+    .then(() => console.log('db succesfully synced'))
+    .catch((error) => console.error("db sync failed with error: " + error));
 
 
-
-});
-
-module.exports = User;
+module.exports = {
+    User: User,
+    Protocol: Protocol,
+    Instruction: Instruction,
+    Result: Result
+}
 
