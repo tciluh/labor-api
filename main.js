@@ -4,14 +4,20 @@
 
 //express init
 let express = require('express'); //import express framework
+let bodyParser = require('body-parser'); //import body parser middleware
 let app = express();  //get the global express instance
 let port = process.env.PORT || 3000; //use supplied port or default 3000;
 
 //import sop routes
 let sop_router = require('./api/routes/sop_routes');
+let user_router = require('./api/routes/user_routes');
+
+//use the bodyParser Middleware for JSON parsing of the request body.
+app.use(bodyParser.json());
 
 //use the SOP router for the /sop/ prefix
 app.use('/sop/', sop_router);
+app.use('/user/', user_router);
 
 app.listen(port, () => console.log("express started")); //actually start the server and print a simple 
                                                         //message to notify the user something is happening
