@@ -12,6 +12,7 @@ let port = process.env.PORT || 3000; //use supplied port or default 3000;
 //import sop routes
 let sop_router = require('./api/routes/sop_routes');
 let user_router = require('./api/routes/user_routes');
+let image_router = require('./api/routes/image_routes');
 
 //use the bodyParser Middleware for JSON parsing of the request body.
 app.use(bodyParser.json());
@@ -19,6 +20,7 @@ app.use(bodyParser.json());
 //use the SOP router for the /sop/ prefix
 app.use('/sop/', sop_router);
 app.use('/user/', user_router);
+app.use('/image/', image_router);
 
 //use the ErrorHandling middleware afterwards to return any errors
 //to the user

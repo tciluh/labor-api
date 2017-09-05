@@ -65,6 +65,15 @@ const User = db.define('user', {
 
 //An Image which can either belong to an result or an instruction
 const Image = db.define('image', {
+    filename: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        unique: true
+    },
+    contentType: {
+        type: Sequelize.STRING,
+        allowNull: false
+    }
 });
 
 //Action describes a shell script/command to be executed on completion/begin of an
@@ -133,6 +142,7 @@ module.exports = {
     Instruction: Instruction,
     Result: Result,
     ProtocolState: ProtocolState,
-    Action: Action
+    Action: Action,
+    Image: Image
 }
 
