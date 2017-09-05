@@ -13,32 +13,19 @@ const db = new Sequelize('sop', 'sop_user', null, {
 //define all database objects
 //for each SOP there is one Protocol entry which holds all metadata and the first instruction
 const Protocol = db.define('protocol', {
-        id: {
-            type: Sequelize.INTEGER,
-            allowNull: false,
-            primaryKey: true,
-            autoIncrement: true,
-        },
-        name: {
-            type: Sequelize.STRING,
-            allowNull: false,
-        },
-        description: {
-            type: Sequelize.TEXT,
-            allowNull: false
-        }
+    name: {
+        type: Sequelize.STRING,
+        allowNull: false,
+    },
+    description: {
+        type: Sequelize.TEXT,
+        allowNull: false
+    }
 });
 
 
 //each instruction only has a description right now
-//TODO: support images
 const Instruction = db.define('instruction', {
-    id: {
-            type: Sequelize.INTEGER,
-            allowNull: false,
-            primaryKey: true,
-            autoIncrement: true,
-    },
     description: {
         type: Sequelize.TEXT,
         allowNull: false,
@@ -48,12 +35,6 @@ const Instruction = db.define('instruction', {
 
 //each instruction results in one or more results (like the beer went dark or light)
 const Result = db.define('result', {
-    id: {
-            type: Sequelize.INTEGER,
-            allowNull: false,
-            primaryKey: true,
-            autoIncrement: true,
-    },
     description: {
         type: Sequelize.TEXT,
         allowNull: false,
@@ -64,58 +45,51 @@ const Result = db.define('result', {
 //there are users
 //needed for logging purposes so that we can track who used a protocol
 const User = db.define('user', {
-        id: {
-            type: Sequelize.INTEGER,
-            allowNull: false,
-            primaryKey: true,
-            autoIncrement: true,
+    firstName: {
+        type: Sequelize.STRING,
+        allowNull: false,
+    },
+    lastName: {
+        type: Sequelize.STRING,
+        allowNull: false,
+    },
+    email: {
+        type: Sequelize.STRING,
+        validate: {
+            isEmail: true
         },
-        firstName: {
-            type: Sequelize.STRING,
-            allowNull: false,
-        },
-        lastName: {
-            type: Sequelize.STRING,
-            allowNull: false,
-        },
-        email: {
-            type: Sequelize.STRING,
-            allowNull: false,
-        }
+        allowNull: false,
+        unique: true,
+    }
 });
 
-const Action = db.define({
-        id: {
-            type: Sequelize.INTEGER,
-            allowNull: false,
-            primaryKey: true,
-            autoIncrement: true,
-        },
-        uid: {
-            type: Sequelize.INTEGER,
-            allowNull: false
-        },
-        gid: {
-            type: Sequelize.INTEGER,
-            allowNull: false
-        },
-        workingDirectory: {
-            type: Sequelize.STRING,
-            allowNull: false
-        }
-        script:{
-            type: Sequelize.TEXT,
-            allowNull: false
-        }
+//An Image which can either belong to an result or an instruction
+const Image = db.define('image', {
 });
 
-const ProtocolState = db.define({
-        id: {
-            type: Sequelize.INTEGER,
-            allowNull: false,
-            primaryKey: true,
-            autoIncrement: true,
-        }
+//Action describes a shell script/command to be executed on completion/begin of an
+//instruction or result.
+const Action = db.define('action',{
+    uid: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+    },
+    gid: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+    },
+    workingDirectory: {
+        type: Sequelize.STRING,
+        allowNull: false
+    },
+    script: {
+        type: Sequelize.TEXT,
+        allowNull: false
+    }
+});
+
+//A table which records the progress of an protocol for a certain user
+const ProtocolState = db.define('state',{
 });
 
 //Relationships
@@ -131,6 +105,10 @@ Result.hasOne(Instruction, { as: 'nextInstruction', constraints: false, allowNul
 Instruction.hasOne(Action, {as: 'action', constraints: false, allowNull: true});
 //each Result can have one associated action.
 Result.hasOne(Action, {as: 'action', constraints: false, allowNull: true});
+//each Instruction has one or no image.
+Instruction.hasOne(Image, { as:'image', allowNull: true});
+//each Result has one or no image.
+Result.hasOne(Image, { as:'image', allowNull: true});
 //each ProtocolState belongs to one Protocol. Duh!
 ProtocolState.belongsTo(Protocol, {as: 'protocol'});
 //each Protocol state belongs to one user.
@@ -143,7 +121,7 @@ ProtocolState.hasOne(Result, {as: 'lastResult', constraints: false, allowNull: t
 //test the database connection by authenticating
 db.authenticate().then(() => console.log("db connection succesful"));
 //sync the database (meaning creating the tables if not existent)
-db.sync()
+db.sync({force: true})
     .then(() => console.log('db succesfully synced'))
     .catch((error) => console.error("db sync failed with error: " + error));
 
