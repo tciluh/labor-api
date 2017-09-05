@@ -16,10 +16,8 @@ function addUser(req, res, next) {
     User.create(req.body)
         .then((user) => res.json(user)) //return the user in json format
         .catch((error) => {
-            //set the error
-            req.error = error;
-            //make sure the error handling middleware gets called
-            next();
+            //calling next with an argument will call the next error handler
+            next(error);
         });
 }
 
@@ -31,10 +29,8 @@ function deleteUser(req, res, next){
                 res.send("User with ID: " + req.params.id + " sucessfully deleted");
             }
             else{
-                //set the error
-                req.error = "error deleting user";
-                //call error handling middleware
-                next();
+                //calling next with an argument will call the next error handler
+                next("error deleting user");
             }
         });
 }
@@ -48,15 +44,13 @@ function updateUser(req, res, next){
                     .then((user) => res.json(user));
             }
             else{
-                req.error = "updated user but no affected rows";
-                next();
+                //calling next with an argument will call the next error handler
+                next("updated user but no affected rows");
             }
         })
         .catch((error) => {
-            //set the error
-            req.error = error;
-            //make sure the error handling middleware gets called
-            next();
+            //calling next with an argument will call the next error handler
+            next(error);
         });
 }
 
@@ -69,10 +63,8 @@ function getUser(req, res, next) {
                 res.json(user);
             }
             else{
-                //set the error
-                req.error = "can't find user";
-                //call error handling middleware
-                next();
+                //calling next with an argument will call the next error handler
+                next("updated user but no affected rows");
             }
         });
 }
