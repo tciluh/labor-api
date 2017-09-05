@@ -84,6 +84,40 @@ const User = db.define('user', {
         }
 });
 
+const Action = db.define({
+        id: {
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            primaryKey: true,
+            autoIncrement: true,
+        },
+        uid: {
+            type: Sequelize.INTEGER,
+            allowNull: false
+        },
+        gid: {
+            type: Sequelize.INTEGER,
+            allowNull: false
+        },
+        workingDirectory: {
+            type: Sequelize.STRING,
+            allowNull: false
+        }
+        script:{
+            type: Sequelize.TEXT,
+            allowNull: false
+        }
+});
+
+const ProtocolState = db.define({
+        id: {
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            primaryKey: true,
+            autoIncrement: true,
+        }
+});
+
 //Relationships
 //each protocol has one first instruction.
 Protocol.hasOne(Instruction, { as: 'firstInstruction'} );
@@ -92,10 +126,19 @@ Instruction.hasMany(Result, { as: 'results'} );
 //or it has a nextInstruction when the result is unambigous
 Instruction.hasOne(Instruction, { as: 'nextInstruction', constraints: false, allowNull: true})
 //each result has a resulting instruction
-Result.hasOne(Instruction, { as: 'nextInstruction', constraints: false});
-//each result belongs to a instruction which lead to the result.
-//Result.belongsTo(Instruction, { as: 'originInstruction' })
-
+Result.hasOne(Instruction, { as: 'nextInstruction', constraints: false, allowNull:true});
+//each Instruction can have an associated action.
+Instruction.hasOne(Action, {as: 'action', constraints: false, allowNull: true});
+//each Result can have one associated action.
+Result.hasOne(Action, {as: 'action', constraints: false, allowNull: true});
+//each ProtocolState belongs to one Protocol. Duh!
+ProtocolState.belongsTo(Protocol, {as: 'protocol'});
+//each Protocol state belongs to one user.
+ProtocolState.belongsTo(User, {as: 'user'});
+//a protocol state has either a last instruction
+//or a last result. Which mark the point of continuation.
+ProtocolState.hasOne(Instruction, {as: 'lastInstruction', constraints: false, allowNull: true});
+ProtocolState.hasOne(Result, {as: 'lastResult', constraints: false, allowNull: true});
 
 //test the database connection by authenticating
 db.authenticate().then(() => console.log("db connection succesful"));
@@ -110,6 +153,8 @@ module.exports = {
     User: User,
     Protocol: Protocol,
     Instruction: Instruction,
-    Result: Result
+    Result: Result,
+    ProtocolState: ProtocolState,
+    Action: Action
 }
 
