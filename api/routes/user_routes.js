@@ -12,4 +12,15 @@ router.route('/')
 router.route('/')
     .post(controller.add);
 
-module.exports = router; //export the SOP Router
+router.route('/:id')
+    .get(controller.get);
+
+router.route('/:id')
+    .post(controller.update);
+
+router.route('/:id')
+    .delete(controller.delete);
+
+
+
+module.exports = router; //export the user Router
