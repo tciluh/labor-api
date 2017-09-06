@@ -9,88 +9,65 @@ const del = require('del');
 const appRoot = require('app-root-path');
 
 //routing function for adding an image
-function addImage(req, res, next) {
-    console.log("filename: " + req.file.filename);
-    console.log("type: " + req.file.mimetype);
-    Image.create({
+async function addImage(req, res, next) {
+    const image = await Image.create({
         filename: req.file.filename,
         contentType: req.file.mimetype //needs to be saved to allow proper downloading
-    })
-        .then((createdImage) => res.json(createdImage))//return the image object
-        .catch((error) => next(error));//pass the error to the error handler
+    });
+    res.json(image);
 }
 
 //routing function for updating an image
-function updateImage(req, res, next){
-    let imagename;
-    Image.findById(req.params.id)
-        .then(image => {
-            //see deleteImage
-            imagename = image.filename
-            return image;
-        })
-        .then(image => {
-            //update the image metadata
-            return image.update({
-                filename: req.file.filename,
-                contentType: req.file.mimetype
-            })
-        })
-        .then(() => {
-            //delete the old image.
-            //XXX: fix the hardcoded images path
-            try{
-                del.sync(['images/' + imagename]);
-            }
-            catch(error){ next(error); }
-            //return the updated image
-            Image.findById(req.params.id)
-                .then(image => res.json(image));
-        })
-        .catch(error => next(error));
+async function updateImage(req, res, next){
+    //find the image in question
+    let image = await Image.findById(req.params.id);
+    if(!image){
+        //throw error
+        next("no image with the given id found");
+    }
+    //save old filename
+    const oldFilename = image.filename;
+    //perform the update
+    await image.update({
+        filename: req.file.filename,
+        contentType: req.file.mimetype //needs to be saved to allow proper downloading
+    });
+    //delete the old file
+    await del(['images/' + oldFilename]);
+    //return the updated image db entry
+    res.json(image);
 }
 
 //routing function for deleting an image
-function deleteImage(req, res, next){
-    let imagename;
-    Image.findById(req.params.id)
-        .then(image => {
-            //this is ugly
-            //but we need the filename after it
-            //has been deleted in the database
-            imagename = image.filename;
-            return image;
-        })
-        .then(image => image.destroy())
-        .then(() => {
-            //delete the actual file
-            //XXX: fix the hardcoded images path
-            try{
-                del.sync(['images/' + imagename]);
-            }
-            catch(error){ next(error); }
-
-            res.send("Image succesfully deleted");
-        })
-        .catch((error) => next(error));
+async function deleteImage(req, res, next){
+    //find the image in question
+    let image = await Image.findById(req.params.id);
+    if(!image){
+        //throw error
+        next("no image with the given id found");
+    }
+    //save the filename
+    const filename = image.filename;
+    //delete from db
+    await image.destroy();
+    //delete image file from disk
+    await del(['images/' + filename]);
 }
 
 //routing function for getting an image
-function getImage(req, res, next){
+async function getImage(req, res, next){
     //get corresponding db entry
-    Image.findById(req.params.id)
-        .then(image => {
-            if(image) {
-                //set content type since the pictures have no extension
-                res.type(image.contentType);
-                //send the file
-                res.sendFile('images/' + image.filename, { root: appRoot.toString() });
-            }
-            else{
-                //throw error
-                next("no image with the given id found");
-            }
-        })
+    let image = await Image.findById(req.params.id);
+    if(!image){
+        //throw error
+        next("no image with the given id found");
+    }
+    //set the content type since all the files in the image
+    //directory have no extension and sendFile sets the content-type
+    //based on the extension
+    res.type(image.contentType);
+    //send the file
+    res.sendFile('images/' + image.filename, { root: appRoot.toString()});
 }
 
 

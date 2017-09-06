@@ -4,6 +4,7 @@ let express = require('express'); //import express
 let router = express.Router(); //create a new router for Images
 
 let controller = require('../controllers/image_controller');//import image controller
+let syncify = require('../middleware/async_util');
 
 //import multer
 //used for uploading images vai multipart/form-data http request
@@ -16,20 +17,20 @@ let upload = multer({ dest: 'images/'});
 
 //add an image
 router.route('/')
-    .post(upload.single('image'), controller.add);
+    .post(upload.single('image'), syncify(controller.add));
 
 //ID Specific routes
 
 //get an image with the given id
 router.route('/:id')
-    .get(controller.get);
+    .get(syncify(controller.get));
 
 //update an image with the given id
 router.route('/:id')
-    .put(upload.single('image'), controller.update);
+    .put(upload.single('image'), syncify(controller.update));
 
 //delete an image with the given id
 router.route('/:id')
-    .delete(controller.delete);
+    .delete(syncify(controller.delete));
 
 module.exports = router;

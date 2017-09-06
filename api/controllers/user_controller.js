@@ -6,67 +6,55 @@ const Model = require('../model/sop_model')
 const User = Model.User;
 
 //a route function which returns all Users which are currently in the database
-function getAllUsers(req, res, next) {
-    User.findAll()
-        .then((users) => res.json(users))
+async function getAllUsers(req, res, next) {
+    const users = await User.findAll();
+    res.json(users);
 }
 
 //a route function to add a User
-function addUser(req, res, next) {
-    User.create(req.body)
-        .then((user) => res.json(user)) //return the user in json format
-        .catch((error) => {
-            //calling next with an argument will call the next error handler
-            next(error);
-        });
+async function addUser(req, res, next) {
+    const user = await User.create(req.body);
+    res.json(user);
 }
 
 //a route function to delete a user
-function deleteUser(req, res, next){
-    User.destroy({ where: { id: req.params.id } })
-        .then((deletedRows) => {
-            if(deletedRows > 0){
-                res.send("User with ID: " + req.params.id + " sucessfully deleted");
-            }
-            else{
-                //calling next with an argument will call the next error handler
-                next("error deleting user");
-            }
-        });
+async function deleteUser(req, res, next){
+    const user = await User.findById(req.params.id);
+    //check if there is a user with the given id
+    if(!user){
+        //throw error 
+        next("no user found with the given id");
+    }
+    await user.destroy();
+    res.send("User with ID: " + req.params.id + " sucessfully deleted");
 }
 
 //a route to update the info of a user
-function updateUser(req, res, next){
-    User.update(req.body, { where: { id: req.params.id }})
-        .then((affectedCount, affectedRows) => {
-            if(affectedCount > 0) {
-                User.findById(req.params.id)
-                    .then((user) => res.json(user));
-            }
-            else{
-                //calling next with an argument will call the next error handler
-                next("updated user but no affected rows");
-            }
-        })
-        .catch((error) => {
-            //calling next with an argument will call the next error handler
-            next(error);
-        });
+async function updateUser(req, res, next){
+    const user = await User.findById(req.params.id);
+    //check if there is a user with the given id
+    console.log('got user ');
+    //console.log(user);
+    if(!user){
+        //throw error 
+        console.error('no user found');
+        next("no user found with the given id");
+    }
+    //perform the update
+    await user.update(req.body);
+    //return the updated user
+    res.json(user);
 }
 
 //a route function to get a certain user
-function getUser(req, res, next) {
-    User.findById(req.params.id)
-        .then((user) => {
-            if(user){
-                //return the user in json
-                res.json(user);
-            }
-            else{
-                //calling next with an argument will call the next error handler
-                next("updated user but no affected rows");
-            }
-        });
+async function getUser(req, res, next) {
+    const user = await User.findById(req.params.id);
+    if(user){
+        res.json(user);
+    }
+    else{
+        next("no user found with the given id");
+    }
 }
 
 module.exports = {

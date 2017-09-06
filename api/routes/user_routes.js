@@ -5,28 +5,30 @@ let router = express.Router(); //create a new router for the Users
 
 let controller = require('../controllers/user_controller');//import user controller
 
+let syncify = require('../middleware/async_util');
+
 //define root route
 //on a GET return all Users
 router.route('/')
-    .get(controller.getAll); 
+    .get(syncify(controller.getAll)); 
 
 //on POST add a user
 router.route('/')
-    .post(controller.add);
+    .post(syncify(controller.add));
 
 //id specific routes
 
 //on GET get a user with the given id
 router.route('/:id')
-    .get(controller.get);
+    .get(syncify(controller.get));
 
 //on PUT update a user with the given id
 router.route('/:id')
-    .put(controller.update);
+    .put(syncify(controller.update));
 
 //on DELETE delete a user with the given id
 router.route('/:id')
-    .delete(controller.delete);
+    .delete(syncify(controller.delete));
 
 
 
