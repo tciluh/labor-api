@@ -20,9 +20,9 @@ router.route('/')
 router.route('/:id')
     .get(controller.get);
 
-//on POST update a user with the given id
+//on PUT update a user with the given id
 router.route('/:id')
-    .post(controller.update);
+    .put(controller.update);
 
 //on DELETE delete a user with the given id
 router.route('/:id')
