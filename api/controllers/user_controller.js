@@ -31,13 +31,11 @@ async function deleteUser(req, res, next){
 
 //a route to update the info of a user
 async function updateUser(req, res, next){
-    const user = await User.findById(req.params.id);
+    let user = await User.findById(req.params.id);
     //check if there is a user with the given id
-    console.log('got user ');
     //console.log(user);
     if(!user){
         //throw error 
-        console.error('no user found');
         next("no user found with the given id");
     }
     //perform the update
