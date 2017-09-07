@@ -28,8 +28,7 @@ const Protocol = db.define('protocol', {
 const Instruction = db.define('instruction', {
     description: {
         type: Sequelize.TEXT,
-        allowNull: false,
-    }
+        allowNull: false, }
 });
 
 
@@ -102,30 +101,32 @@ const ProtocolState = db.define('state',{
 });
 
 //Relationships
-//each protocol has one first instruction.
-Protocol.hasOne(Instruction, { as: 'firstInstruction'} );
+//each Instruction belongs to a protocol
+Instruction.belongsTo(Protocol);
 //each instruction has one or more results
-Instruction.hasMany(Result, { as: 'results'} );
-//or it has a nextInstruction when the result is unambigous
-Instruction.hasOne(Instruction, { as: 'nextInstruction', constraints: false, allowNull: true})
-//each result has a resulting instruction
-Result.hasOne(Instruction, { as: 'nextInstruction', constraints: false, allowNull:true});
+Instruction.hasMany(Result, { as: 'results', foreignKey: 'sourceInstructionId'} );
+//the other way around. Each Result belongs to one source instruction.
+Result.belongsTo(Instruction, { as: 'sourceInstruction', foreignKey: 'sourceInstructionId'})
+//each instruction is the target of an result
+Instruction.belongsTo(Result, { as: 'sourceResult', foreignKey: 'sourceResultId', constraints: false});
+//the other way around each result has one target instruction
+Result.hasOne(Instruction, { as: 'targetInstruction', foreignKey: 'sourceResultId', constraints: false});
 //each Instruction can have an associated action.
-Instruction.hasOne(Action, {as: 'action', constraints: false, allowNull: true});
+Instruction.belongsTo(Action, {as: 'action', constraints: false, allowNull: true});
 //each Result can have one associated action.
-Result.hasOne(Action, {as: 'action', constraints: false, allowNull: true});
+Result.belongsTo(Action, {as: 'action', constraints: false, allowNull: true});
 //each Instruction has one or no image.
-Instruction.hasOne(Image, { as:'image', allowNull: true});
+Instruction.belongsTo(Image, { as:'image', allowNull: true});
 //each Result has one or no image.
-Result.hasOne(Image, { as:'image', allowNull: true});
+Result.belongsTo(Image, { as:'image', allowNull: true});
 //each ProtocolState belongs to one Protocol. Duh!
 ProtocolState.belongsTo(Protocol, {as: 'protocol'});
 //each Protocol state belongs to one user.
 ProtocolState.belongsTo(User, {as: 'user'});
 //a protocol state has either a last instruction
 //or a last result. Which mark the point of continuation.
-ProtocolState.hasOne(Instruction, {as: 'lastInstruction', constraints: false, allowNull: true});
-ProtocolState.hasOne(Result, {as: 'lastResult', constraints: false, allowNull: true});
+ProtocolState.belongsTo(Instruction, {as: 'lastInstruction', constraints: false, allowNull: true});
+ProtocolState.belongsTo(Result, {as: 'lastResult', constraints: false, allowNull: true});
 
 //test the database connection by authenticating
 db.authenticate().then(() => console.log("db connection succesful"));
