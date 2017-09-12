@@ -9,18 +9,22 @@ let errorHandling = require('./api/middleware/error_handling');
 let app = express();  //get the global express instance
 let port = process.env.PORT || 3000; //use supplied port or default 3000;
 
-//import sop routes
-let sop_router = require('./api/routes/sop_routes');
-let user_router = require('./api/routes/user_routes');
-let image_router = require('./api/routes/image_routes');
+//import all routes
+let protocolRouter = require('./api/routes/protocol_routes');
+let instructionRouter = require('./api/routes/instruction_routes');
+let resultRouter = require('./api/routes/result_routes');
+let userRouter = require('./api/routes/user_routes');
+let imageRouter = require('./api/routes/image_routes');
 
 //use the bodyParser Middleware for JSON parsing of the request body.
 app.use(bodyParser.json());
 
 //use the SOP router for the /sop/ prefix
-app.use('/sop/', sop_router);
-app.use('/user/', user_router);
-app.use('/image/', image_router);
+app.use('/protocol/', protocolRouter);
+app.use('/instruction/', instructionRouter);
+app.use('/result/', resultRouter);
+app.use('/user/', userRouter);
+app.use('/image/', imageRouter);
 
 //use the ErrorHandling middleware afterwards to return any errors
 //to the user
@@ -30,5 +34,3 @@ app.use(errorHandling.logToConsole);
 
 app.listen(port, () => console.log("express started")); //actually start the server and print a simple 
                                                         //message to notify the user something is happening
-
-
