@@ -130,16 +130,18 @@ Result.belongsTo(Instruction, {
     foreignKey: 'sourceInstructionId'
 })
 //each instruction is the target of an result
-Instruction.belongsTo(Result, {
+Instruction.hasOne(Result, {
     as: 'sourceResult',
-    foreignKey: 'sourceResultId',
-    constraints: false
+    foreignKey: 'targetInstructionId',
+    allowNull: true
+    //constraints: false
 });
 //the other way around each result has one target instruction
-Result.hasOne(Instruction, {
+Result.belongsTo(Instruction, {
     as: 'targetInstruction',
-    foreignKey: 'sourceResultId',
-    constraints: false
+    foreignKey: 'targetInstructionId',
+    allowNull: true,
+    //constraints: false
 });
 //each Instruction can have an associated action.
 Instruction.belongsTo(Action, {
