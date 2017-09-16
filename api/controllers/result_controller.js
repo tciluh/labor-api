@@ -4,11 +4,6 @@
 const Model = require('../model/sop_model');
 const Result = Model.Result;
 
-async function addResult(req, res, next) {
-    const result = await Result.create(req.body);
-    //return the created result
-    res.json(result);
-}
 async function getResult(req, res, next) {
     //find by id
     const result = Result.findById(req.params.id);
@@ -27,14 +22,17 @@ async function updateResult(req, res, next) {
     if (!result) {
         next("no result with the given id found.");
     }
+    //we only allow image and description updates so that
+    //a malicious attacker can't change the protocol structure
+    //over this interface
+    const allowedFields = ['imageId', 'description'];
     //perform the actual update
-    await result.update(req.body);
+    await result.update(req.body, allowedFields);
     //return the updated result
     res.json(result);
 }
 
 module.exports= {
     get: getResult,
-    add: addResult,
     update: updateResult,
 }

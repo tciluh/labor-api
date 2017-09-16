@@ -7,13 +7,10 @@ let controller = require('../controllers/result_controller'); //import sop contr
 //we need the async utility
 let syncify = require('../middleware/async_util');
 
-//we only support add, update, get for results
+//we only support update, get for results
+//add is handled by protocol creation
 //delete is handled by deleting a linked protocol
 //and there shouldnt be a way to get all results.
-
-//on POST add a result with parameters in the http body
-router.route('/')
-    .post(syncify(controller.add));
 
 //on GET return a result with the given id
 router.route('/:id')

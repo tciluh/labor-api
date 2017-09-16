@@ -8,13 +8,11 @@ let controller = require('../controllers/instruction_controller');//import sop c
 //we need the async utility
 let syncify = require('../middleware/async_util');
 
-//we only support add, update, get for instructions
+//we only support update, get for instructions
 //delete is handled by deleting a linked protocol
+//and there added via a protocol aswell
 //and there shouldnt be a way to get all instructions.
 
-//on POST add an instruction with parameters in the http body
-router.route('/')
-    .post(syncify(controller.add));
 
 //on GET return an instruction with the given id
 router.route('/:id')
