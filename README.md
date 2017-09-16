@@ -1,20 +1,16 @@
-# Depedencys
-- mongodb
-- npm
-- nodejs
+# Labor API Project
+A laboratory information server written in node that makes protocols available to numerous end devices via a RestAPI.
 
-# Ideen/Fragen
+## Depedencys
+- `nodejs`
+- `sqlite3`
 
-- Websocket vs. MQTT fuer Ergebnis Verteilung
-    - Websocket ist eher geeignet fuer zentralen Server (socket.io)
-    - MQTT eher fuer P2P weil nicht einer zentral verteilen muss
+## Installation
+- make sure that all dependency's are installed
+- install all node modules: `npm install`
+- start the main.js: `npm start` or `node main.js`
 
-- SQL vs. MongoDB
-    - im Moment wuerde ich MySQL bevorzugen weil die SOPs schon ziemlich relational sind.
-        - als ORM wuerde Sequelize in betracht kommen. http://docs.sequelizejs.com/manual/installation/getting-started.html
-
-- Bilder Speicherung
-    - extern vs. in Datenbank
-    - extern waere flexibler was konvertierungen usw. angeht. 
-
-
+## TODO
+- websocket vs MQTT 
+    - websocket is better suited for a single server (socket.io)
+    - MQTT makes m2m communication very easy
