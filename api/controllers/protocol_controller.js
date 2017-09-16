@@ -17,15 +17,15 @@ const findOptions = {
         as: 'instructions',
         attributes: ['id', 'description'],
         include: [{
-                model: Result,
-                as: 'results',
-                attributes: ['id', 'description', 'targetInstructionId'],
-                include: [{
-                    model: Image,
-                    as: 'image',
-                    attributes: ['id']
-                }]
-            },
+            model: Result,
+            as: 'results',
+            attributes: ['id', 'description', 'targetInstructionId'],
+            include: [{
+                model: Image,
+                as: 'image',
+                attributes: ['id']
+            }]
+        },
             {
                 model: Image,
                 as: 'image',
@@ -51,12 +51,94 @@ async function getProtocol(req, res, next) {
 }
 
 async function addProtocol(req, res, next) {
-    //only allow the name and description fields to be set.
-    //we dont want the user setting anything else
+    //XXX: transactions please!
+    
+    //only allow the name and description fields to be set at first.
+    //the steps and instructions get parsed seperatly
     const allowedFields = ['name', 'description'];
-    const protocol = await Protocol.create(req.body, { fields: allowedFields });
-    //return the created instance to the user
-    res.json(protocol);
+    let protocol = await Protocol.create(req.body, { fields: allowedFields });
+    //parse the instructions.
+    //check that we have at least one instruction. otherwise
+    //the submitted protocol is not valid
+    if(!req.body.instructions
+        || !(req.body.instructions instanceof Array)
+        || req.body.instructions.length < 1)
+        throw new Error("instructions array malformed");
+    //iterative approach
+    let createdInstructions = [];//all instructions in their creation order
+    let createdResults = [];//array of objects where 
+                            //input => input result json,
+                            //instance => created result instance
+    let instructions = req.body.instructions;//alias for less code
+    //first loop insert all instructions + results
+    //but do not set target instructions yet.
+    for(let i = 0; i < instructions.length; ++i){
+        const input = instructions[i];
+        let createdInstruction = await Instruction.create(input,{
+            fields: ['description', 'imageId']
+        });
+        //make sure to mark the first instruction
+        if(i == 0){
+            await createdInstruction.update({
+                isFirst: true
+            });
+        }
+        //set the protocol 
+        await createdInstruction.setProtocol(protocol);
+        //save the id in the createdInstructions array
+        createdInstructions[i] = createdInstruction;
+        //make sure that this instruction has at least one result
+        if(!input.results
+            || !(input.results instanceof Array)
+            || input.results.length <= 0
+        ) next(`instruction at index ${i} has no result`);
+        //create each result
+        for(let result of input.results){
+            let createdResult = await Result.create(result, {
+                 fields: ['description', 'imageId']
+            }); 
+            //set the protocol
+            await createdResult.setProtocol(protocol);
+            //set the correct source instruction
+            await createdResult.setSourceInstruction(createdInstruction);
+            //save for the second run since we cant set the 
+            //target instruction here because it havent been created yet.
+            createdResults.push({
+                input: result,
+                instance: createdResult
+            });
+        }
+    }
+    //second loop fix all the target instructions for each result
+    //fancy destructuring syntax.
+    //each object in createdResults is an object with the keys input and instance
+    //this iterates over each object in createdResults and simultaneously unwraps
+    //the object into its parts.
+    for(let {input, instance}  of createdResults){
+        //make sure that the input is valid
+        if(!input) {
+            next({
+                msg: "malformed result",
+                malformedResult: input
+            });
+        }
+        //the targetInstructionId can be null for the last result.
+        if(!input.targetInstructionId) continue;
+        const targetIdx = input.targetInstructionId;
+        //make sure the submitted targetInstruction is even there
+        if(targetIdx < 0 || targetIdx >= createdInstructions.length){
+            next({
+                msg: "malformed result, targetInstruction Out-of-Bounds" ,
+                malformedResult: input
+            });
+        }
+        //get the target Instruction
+        let targetInstruction = createdInstructions[targetIdx];
+        //update the result
+        await instance.setTargetInstruction(targetInstruction);
+    }
+    //return the created protocol
+    res.json(await Protocol.findById(protocol.id, findOptions));
 }
 
 async function updateProtocol(req, res, next) {
