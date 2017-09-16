@@ -15,6 +15,9 @@ router.route('/')
 //on parameterised GET return a certain protocol
 router.route('/:id')
     .get(syncify(controller.get));
+//on POST add a protocol
+router.route('/')
+    .post(syncify(controller.add));
 //on DELETE delete the protocol and associated instructions and results.
 router.route('/:id')
     .delete(syncify(controller.delete));
