@@ -10,22 +10,24 @@ const appRoot = require('app-root-path');
 
 //routing function for adding an image
 async function addImage(req, res, next) {
-    if(!req.file) next("image upload failed, file is not defined after upload");
-    const image = await Image.create({
-        filename: req.file.filename,
-        contentType: req.file.mimetype //needs to be saved to allow proper downloading
-    });
-    res.jsonSuccess(image);
+    if(!req.file) return next("image upload failed, file is not defined after upload");
+    else{
+        const image = await Image.create({
+            filename: req.file.filename,
+            contentType: req.file.mimetype //needs to be saved to allow proper downloading
+        });
+        res.jsonSuccess(image);
+    }
 }
 
 //routing function for updating an image
 async function updateImage(req, res, next){
-    if(!req.file) next("image update failed, file is not defined after upload");
+    if(!req.file) return next("image update failed, file is not defined after upload");
     //find the image in question
     let image = await Image.findById(req.params.id);
     if(!image){
         //throw error
-        next("no image with the given id found");
+        return next("no image with the given id found");
     }
     //save old filename
     const oldFilename = image.filename;
@@ -46,7 +48,7 @@ async function deleteImage(req, res, next){
     let image = await Image.findById(req.params.id);
     if(!image){
         //throw error
-        next("no image with the given id found");
+        return next("no image with the given id found");
     }
     //save the filename
     const filename = image.filename;
@@ -64,7 +66,7 @@ async function getImage(req, res, next){
     let image = await Image.findById(req.params.id);
     if(!image){
         //throw error
-        next("no image with the given id found");
+        return next("no image with the given id found");
     }
     //set the content type since all the files in the image
     //directory have no extension and sendFile sets the content-type

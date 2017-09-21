@@ -23,7 +23,7 @@ async function deleteUser(req, res, next){
     //check if there is a user with the given id
     if(!user){
         //throw error 
-        next("no user found with the given id");
+        return next("no user found with the given id");
     }
     await user.destroy();
     res.jsonSuccess(`User with ID:  ${req.params.id} sucessfully deleted`);
@@ -36,7 +36,7 @@ async function updateUser(req, res, next){
     //console.log(user);
     if(!user){
         //throw error 
-        next("no user found with the given id");
+        return next("no user found with the given id");
     }
     //perform the update
     await user.update(req.body);
@@ -51,7 +51,7 @@ async function getUser(req, res, next) {
         res.jsonSuccess(user);
     }
     else{
-        next("no user found with the given id");
+        return next("no user found with the given id");
     }
 }
 

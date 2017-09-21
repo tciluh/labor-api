@@ -46,7 +46,7 @@ async function getProtocol(req, res, next) {
     if (protocol) {
         res.jsonSuccess(protocol);
     } else {
-        next('no protocol found with the given id');
+        return next('no protocol found with the given id');
     }
 }
 
@@ -91,7 +91,7 @@ async function addProtocol(req, res, next) {
         if(!input.results
             || !(input.results instanceof Array)
             || input.results.length <= 0
-        ) next(`instruction at index ${i} has no result`);
+        ) return next(`instruction at index ${i} has no result`);
         //create each result
         for(let result of input.results){
             let createdResult = await Result.create(result, {
@@ -117,7 +117,7 @@ async function addProtocol(req, res, next) {
     for(let {input, instance}  of createdResults){
         //make sure that the input is valid
         if(!input) {
-            next({
+            return next({
                 msg: "malformed result",
                 malformedResult: input
             });
@@ -127,7 +127,7 @@ async function addProtocol(req, res, next) {
         const targetIdx = input.targetInstructionId;
         //make sure the submitted targetInstruction is even there
         if(targetIdx < 0 || targetIdx >= createdInstructions.length){
-            next({
+            return next({
                 msg: "malformed result, targetInstruction Out-of-Bounds" ,
                 malformedResult: input
             });
@@ -145,7 +145,7 @@ async function updateProtocol(req, res, next) {
     let protocol = await Protocol.findById(req.params.id);
     if (!protocol) {
         //we cant update a protocol we dont have
-        next('no protocol found with the given id');
+        return next('no protocol found with the given id');
     }
     const updateableFields = ['description', 'name'];
     //perform the update
@@ -158,7 +158,7 @@ async function deleteProtocol(req, res, next) {
     let protocol = await Protocol.findById(req.params.id);
     if (!protocol) {
         //we cant update a protocol we dont have
-        next('no protocol found with the given id');
+        return next('no protocol found with the given id');
     }
     //delete the protocol and all associated instructions & results
     //XXX: create a transaction for this!

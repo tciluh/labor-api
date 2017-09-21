@@ -12,7 +12,7 @@ async function getInstruction(req, res, next) {
         //return 
         res.jsonSuccess(instr);
     } else {
-        next("no instruction with the given id found.");
+        return next("no instruction with the given id found.");
     }
 
 }
@@ -21,7 +21,7 @@ async function updateInstruction(req, res, next) {
     let instr = Instruction.findById(req.params.id);
     //check if there is an instruction to update
     if (!instr) {
-        next("no instruction with the given id found.")
+        return next("no instruction with the given id found.")
     }
     //we only allow image and description updates so that
     //a malicious attacker can't change the protocol structure

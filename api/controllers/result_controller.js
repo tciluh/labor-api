@@ -12,7 +12,7 @@ async function getResult(req, res, next) {
         //return it
         res.jsonSuccess(result);
     } else {
-        next("no result with the given id found.");
+        return next("no result with the given id found.");
     }
 
 }
@@ -20,7 +20,7 @@ async function updateResult(req, res, next) {
     //get the result to update
     let result = Result.findById(req.params.id);
     if (!result) {
-        next("no result with the given id found.");
+        return next("no result with the given id found.");
     }
     //we only allow image and description updates so that
     //a malicious attacker can't change the protocol structure
