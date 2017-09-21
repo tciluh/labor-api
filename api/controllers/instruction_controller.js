@@ -10,7 +10,7 @@ async function getInstruction(req, res, next) {
     //check if we found something.
     if (instr) {
         //return 
-        res.json(instr);
+        res.jsonSuccess(instr);
     } else {
         next("no instruction with the given id found.");
     }
@@ -30,7 +30,7 @@ async function updateInstruction(req, res, next) {
     //perform the actual update
     await instr.update(req.body, allowedFields);
     //return the updated instruction
-    res.json(instr);
+    res.jsonSuccess(instr);
 
 
 }

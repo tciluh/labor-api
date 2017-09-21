@@ -8,7 +8,7 @@
 function sendRequestError(err, req, res, next){
     //set the status code to 500
     //and return a json error object
-    res.status(500).json({
+    res.status(500).jsonError({
         url: req.url,
         body: req.body,
         method: req.method,
@@ -19,6 +19,7 @@ function sendRequestError(err, req, res, next){
     next(err);
 }
 
+//a function which logs the error to the console
 function logRequestError(err, req, res, next){
     console.warn('an error ocurred while performing a request');
     console.error(JSON.stringify({

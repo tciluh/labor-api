@@ -6,6 +6,7 @@
 let express = require('express'); //import express framework
 let bodyParser = require('body-parser'); //import body parser middleware
 let errorHandling = require('./api/middleware/error_handling');
+let jsonResponse = require('./api/middleware/json_response');
 let app = express();  //get the global express instance
 let port = process.env.PORT || 3000; //use supplied port or default 3000;
 
@@ -18,6 +19,8 @@ let imageRouter = require('./api/routes/image_routes');
 
 //use the bodyParser Middleware for JSON parsing of the request body.
 app.use(bodyParser.json());
+//use the json extension functions since they are used by the routers
+app.use(jsonResponse);
 
 //use the SOP router for the /sop/ prefix
 app.use('/protocol/', protocolRouter);

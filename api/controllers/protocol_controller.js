@@ -38,13 +38,13 @@ const findOptions = {
 //a route function which returns all Protocols(/SOPs) which are currently in the database
 async function getAllProtocols(req, res, next) {
     const protocols = await Protocol.findAll(findOptions);
-    res.json(protocols);
+    res.jsonSuccess(protocols);
 }
 
 async function getProtocol(req, res, next) {
     const protocol = await Protocol.findById(req.params.id, findOptions);
     if (protocol) {
-        res.json(protocol);
+        res.jsonSuccess(protocol);
     } else {
         next('no protocol found with the given id');
     }
@@ -138,7 +138,7 @@ async function addProtocol(req, res, next) {
         await instance.setTargetInstruction(targetInstruction);
     }
     //return the created protocol
-    res.json(await Protocol.findById(protocol.id, findOptions));
+    res.jsonSuccess(await Protocol.findById(protocol.id, findOptions));
 }
 
 async function updateProtocol(req, res, next) {
@@ -151,7 +151,7 @@ async function updateProtocol(req, res, next) {
     //perform the update
     await protocol.update(req.body, updateableFields);
     //return the updated protocol
-    res.json(protocol);
+    res.jsonSuccess(protocol);
 }
 
 async function deleteProtocol(req, res, next) {
@@ -177,8 +177,8 @@ async function deleteProtocol(req, res, next) {
     //finally delete the protocol itself
     await protocol.destroy();
 
-    //send some kind of response back
-    res.send("deletion sucessful");
+    //send success response back
+    res.jsonSuccess(`protocol with id: ${req.params.id} successfully deleted`);
 }
 
 module.exports = {

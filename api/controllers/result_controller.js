@@ -10,7 +10,7 @@ async function getResult(req, res, next) {
     //if there is result with the given id
     if (result) {
         //return it
-        res.json(result);
+        res.jsonSuccess(result);
     } else {
         next("no result with the given id found.");
     }
@@ -29,7 +29,7 @@ async function updateResult(req, res, next) {
     //perform the actual update
     await result.update(req.body, allowedFields);
     //return the updated result
-    res.json(result);
+    res.jsonSuccess(result);
 }
 
 module.exports= {

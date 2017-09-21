@@ -8,13 +8,13 @@ const User = Model.User;
 //a route function which returns all Users which are currently in the database
 async function getAllUsers(req, res, next) {
     const users = await User.findAll();
-    res.json(users);
+    res.jsonSuccess(users);
 }
 
 //a route function to add a User
 async function addUser(req, res, next) {
     const user = await User.create(req.body);
-    res.json(user);
+    res.jsonSuccess(user);
 }
 
 //a route function to delete a user
@@ -26,7 +26,7 @@ async function deleteUser(req, res, next){
         next("no user found with the given id");
     }
     await user.destroy();
-    res.send("User with ID: " + req.params.id + " sucessfully deleted");
+    res.jsonSuccess(`User with ID:  ${req.params.id} sucessfully deleted`);
 }
 
 //a route to update the info of a user
@@ -41,14 +41,14 @@ async function updateUser(req, res, next){
     //perform the update
     await user.update(req.body);
     //return the updated user
-    res.json(user);
+    res.jsonSuccess(user);
 }
 
 //a route function to get a certain user
 async function getUser(req, res, next) {
     const user = await User.findById(req.params.id);
     if(user){
-        res.json(user);
+        res.jsonSuccess(user);
     }
     else{
         next("no user found with the given id");

@@ -10,15 +10,17 @@ const appRoot = require('app-root-path');
 
 //routing function for adding an image
 async function addImage(req, res, next) {
+    if(!req.file) next("image upload failed, file is not defined after upload");
     const image = await Image.create({
         filename: req.file.filename,
         contentType: req.file.mimetype //needs to be saved to allow proper downloading
     });
-    res.json(image);
+    res.jsonSuccess(image);
 }
 
 //routing function for updating an image
 async function updateImage(req, res, next){
+    if(!req.file) next("image update failed, file is not defined after upload");
     //find the image in question
     let image = await Image.findById(req.params.id);
     if(!image){
@@ -33,9 +35,9 @@ async function updateImage(req, res, next){
         contentType: req.file.mimetype //needs to be saved to allow proper downloading
     });
     //delete the old file
-    await del(['images/' + oldFilename]);
+    await del([`images/${oldFilename}`]);
     //return the updated image db entry
-    res.json(image);
+    res.jsonSuccess(image);
 }
 
 //routing function for deleting an image
@@ -51,7 +53,9 @@ async function deleteImage(req, res, next){
     //delete from db
     await image.destroy();
     //delete image file from disk
-    await del(['images/' + filename]);
+    await del([`images/${filename}`]);
+    //return a successful response
+    res.jsonSuccess(`Image with id: ${req.params.id} succesfully deleted`);
 }
 
 //routing function for getting an image
@@ -67,7 +71,7 @@ async function getImage(req, res, next){
     //based on the extension
     res.type(image.contentType);
     //send the file
-    res.sendFile('images/' + image.filename, { root: appRoot.toString()});
+    res.sendFile(`images/${image.filename}`, { root: appRoot.toString()});
 }
 
 
