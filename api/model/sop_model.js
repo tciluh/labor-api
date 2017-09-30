@@ -8,7 +8,10 @@ const db = new Sequelize('labor-api', 'labor', null, {
     dialect: 'postgres',
 });
 
-//define all database objects
+//----------------------
+//Tables
+//----------------------
+
 //for each SOP there is one Protocol entry which holds all metadata and the first instruction
 const Protocol = db.define('protocol', {
     name: {
@@ -102,7 +105,11 @@ const Action = db.define('action', {
 //A table which records the progress of an protocol for a certain user
 const ProtocolState = db.define('state', {});
 
+
+//----------------------
 //Relationships
+//----------------------
+
 //each Protocol has many Instructions
 Protocol.hasMany(Instruction, {
     as: 'instructions',
