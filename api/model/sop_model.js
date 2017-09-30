@@ -105,6 +105,45 @@ const Action = db.define('action', {
 //A table which records the progress of an protocol for a certain user
 const ProtocolState = db.define('state', {});
 
+//A Table which contains every result ever retrieved from an IOPlugin
+const IOResult = db.define('ioresult',
+    {
+        identifier: {
+            type:Sequelize.STRING,
+            validate: {
+                notEmpty: true
+            },
+            allowNull: false
+        },
+        action: {
+            type:Sequelize.STRING,
+            validate: {
+                notEmpty: true
+            },
+            allowNull: false
+        },
+        rawValue: {
+            type: Sequelize.JSON,
+        },
+        value: {
+            type: Sequelize.VIRTUAL,
+            get: function() {
+                //unwrap the json object/literal value
+                const json = this.getDataValue('rawValue');
+                return (json && json.value) ? json.value : null;
+            },
+            set: function(val) {
+                //wrap the value inside an object
+                //this is needed since just a string/value literal is
+                //not valid json. only array/object are valid json top
+                //level objects
+                this.setDataValue('rawValue', {
+                    value: val
+                });
+            }
+        }
+    },
+);
 
 //----------------------
 //Relationships
@@ -209,5 +248,6 @@ module.exports = {
     Result: Result,
     ProtocolState: ProtocolState,
     Action: Action,
-    Image: Image
+    Image: Image,
+    IOResult: IOResult
 }
