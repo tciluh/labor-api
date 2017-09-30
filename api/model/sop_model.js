@@ -1,12 +1,11 @@
 'use strict;' //use strict mode. see main.js
 
-//sequelize import 
+//sequelize import
 const Sequelize = require('sequelize');
 //init db connection
-const db = new Sequelize('sop', 'sop_user', null, {
+const db = new Sequelize('labor-api', 'labor', null, {
     host: 'localhost',
-    dialect: 'sqlite',
-    storage: 'sop.sqlite'
+    dialect: 'postgres',
 });
 
 //define all database objects
@@ -190,8 +189,8 @@ ProtocolState.belongsTo(Result, {
 db.authenticate().then(() => console.log("db connection succesful"));
 //sync the database (meaning creating the tables if not existent)
 db.sync({
-        force: true
-    })
+    force: true
+})
     .then(() => console.log('db succesfully synced'))
     .catch((error) => console.error("db sync failed with error: " + error));
 
