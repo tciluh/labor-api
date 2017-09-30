@@ -1,5 +1,8 @@
 "use strict;"
 
+//import IOResult from model
+const IOResult = require('../model/sop_model').IOResult;
+
 class IOPluginManager{
     constructor(io, pluginDir){
         this.io = io;
@@ -35,8 +38,7 @@ class IOPluginManager{
         }
     }
 
-    handleConnection(socket){
-        console.log(`new client connection with id: ${socket.id}`)
+    handleConnection(socket){ console.log(`new client connection with id: ${socket.id}`)
         //a client connected
         //assign an error handler
         socket.on('error', this.handleError);
@@ -60,8 +62,7 @@ class IOPluginManager{
         console.log(`handle error: ${JSON.stringify(error, null, '  ')}`);
     }
 
-    handleAction(socket, identifier, action, args) {
-        //TODO: find a way to provide a unique way to identify action requests.
+    handleAction(socket, {identifier, action, ...args }, ack_fn) {
         console.log(`handle identifier: ${identifier} action: ${action} with args: ${JSON.stringify(args, null, '  ')}`);
         //make sure we got a valid identifier and action
         if(!identifier || !action){
@@ -70,18 +71,55 @@ class IOPluginManager{
         //get the resposible plugin
         const plugin = this.actionMap[identifier];
         if(plugin){
-            const result = plugin.handler(action, args);
-            if(result){
-                socket.emit('result', result);
+            //check if the action is supported by this plugin
+            if(!plugin.actions.includes(action)){
+                return socket.emit('action error', {
+                    error: `identifier: ${identifier} does not support action: ${action}`
+                })
             }
-            else{
-                socket.emit('action error', "plugin return no result");
-            }
+            //perform the plugin action
+            //this creates an IOResult entry and runs the
+            //plugin handler function
+            this.performPluginAction(plugin, action, args, ack_fn)
+                .then(obj => {
+                    socket.emit('result', obj);
+                })
+                .catch(error => {
+                    socket.emit('action error', {
+                        error: error.message,
+                        identifier: identifier,
+                        action: action,
+                        uniqueid: 0,
+                        args: args
+                    });
+                });
         }
         else{
-            socket.emit('action error', 'identifier not found');
+            socket.emit('action error', {
+                error: 'identifier not found'
+            });
         }
+    }
 
+    async performPluginAction(plugin, action, args, ack_fn){
+        //create IOResult entry
+        let result = await IOResult.create({
+            identifier: plugin.identifier,
+            action: action
+        });
+        //return id to the client
+        ack_fn(result.id);
+        //call the plugin handler
+        let val = await plugin.handler(action, args);
+        //update the ioresult
+        await result.update({
+            value: val
+        });
+        //return the object to emit on the socket
+        return {
+            id: result.id,
+            result: result.value
+        };
     }
 }
 
