@@ -19,6 +19,7 @@ const io = socketio(server);
 const protocolRouter = require('./api/routes/protocol_routes');
 const instructionRouter = require('./api/routes/instruction_routes');
 const resultRouter = require('./api/routes/result_routes');
+const ioResultRouter = require('./api/routes/ioresult_routes');
 const userRouter = require('./api/routes/user_routes');
 const imageRouter = require('./api/routes/image_routes');
 
@@ -31,8 +32,10 @@ app.use(jsonResponse);
 app.use('/protocol/', protocolRouter);
 app.use('/instruction/', instructionRouter);
 app.use('/result/', resultRouter);
+app.use('/ioresult/', ioResultRouter);
 app.use('/user/', userRouter);
 app.use('/image/', imageRouter);
+
 
 //use the ErrorHandling middleware afterwards to return any errors
 //to the user
