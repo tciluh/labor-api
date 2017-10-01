@@ -1,7 +1,7 @@
 "use strict;"
 
 //import IOResult from model
-const IOResult = require('../model/sop_model').IOResult;
+const IOResult = reqlib('/api/model/model').IOResult;
 
 class IOPluginManager{
     constructor(io, pluginDir){

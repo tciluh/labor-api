@@ -1,7 +1,7 @@
 'use strict;' //strict compiler mode. see main.js
 
 //import ORM Object
-const Model = require('../model/sop_model');
+const Model = reqlib('/api/model/model')
 const Protocol = Model.Protocol;
 const Instruction = Model.Instruction;
 const Result = Model.Result;
