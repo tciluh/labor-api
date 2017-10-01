@@ -3,9 +3,9 @@
 let express = require('express'); //import express
 let router = express.Router(); //create a new router for the Users
 
-let controller = require('../controllers/user_controller');//import user controller
+let controller = reqlib('/api/controllers/user_controller');//import user controller
 
-let syncify = require('../middleware/async_util');
+let syncify = reqlib('/api/middleware/async_util');
 
 //define root route
 //on a GET return all Users

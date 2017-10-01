@@ -3,9 +3,9 @@
 let express = require('express'); //import express
 let router = express.Router(); //create a new router for the SOPs
 
-let controller = require('../controllers/protocol_controller'); //import sop controller
+let controller = reqlib('/api/controllers/protocol_controller'); //import sop controller
 //import async utility
-let syncify = require('../middleware/async_util.js');
+let syncify = reqlib('/api/middleware/async_util.js');
 
 //define root route
 

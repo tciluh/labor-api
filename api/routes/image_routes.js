@@ -3,8 +3,8 @@
 let express = require('express'); //import express
 let router = express.Router(); //create a new router for Images
 
-let controller = require('../controllers/image_controller');//import image controller
-let syncify = require('../middleware/async_util');
+let controller = reqlib('/api/controllers/image_controller');//import image controller
+let syncify = reqlib('/api/middleware/async_util');
 
 //import multer
 //used for uploading images vai multipart/form-data http request

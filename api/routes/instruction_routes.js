@@ -3,10 +3,10 @@
 let express = require('express'); //import express
 let router = express.Router(); //create a new router for the SOPs
 
-let controller = require('../controllers/instruction_controller');//import sop controller
+let controller = reqlib('/api/controllers/instruction_controller');//import sop controller
 
 //we need the async utility
-let syncify = require('../middleware/async_util');
+let syncify = reqlib('/api/middleware/async_util');
 
 //we only support update, get for instructions
 //delete is handled by deleting a linked protocol
