@@ -33,9 +33,9 @@ class IOPluginManager{
             recursive: false
         });
         //assign each plugin to its identifier in the actionMap for an easy lookup
-        for(let pluginFile in plugins){
-            log.debug(`got io plugin from file: ${pluginFile} => ${stringify(plugins[pluginFile])}`)
-            this.actionMap[plugins[pluginFile].identifier] = plugins[pluginFile];
+        for(let [file, plugin] of Object.entries(plugins)){
+            log.debug(`got io plugin from file: ${file} => ${stringify(plugin)}`)
+            this.actionMap[plugin.identifier] = plugin;
         }
     }
 
