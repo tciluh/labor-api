@@ -115,6 +115,16 @@ async function addProtocol(req, res, next) {
                 instance: createdResult
             });
         }
+        //create each action
+        let createdActions = [];
+        for(let action of input.actions){
+            let createdAction = await IOAction.create(action, {
+                fields: ['identifier', 'action', 'arguments']
+            }) 
+            createdActions.push(createdAction);
+        }
+        //add to instruction
+        await createdInstruction.setActions(createdActions);
     }
     //second loop fix all the target instructions for each result
     //fancy destructuring syntax.
