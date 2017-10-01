@@ -21,6 +21,9 @@ module.exports.create = (sequelize, db) => {
 //created via create().
 //context contains all these created modules as a mapping between
 //module.provides => module.create()
+//for easier access to the underlying objects deconstructure the context
+//object with the new ES6 syntax 
+//module.exports.relations = ({ Instruction, IOAction, ...rest}) => { ... }
 module.exports.relations = (context) => {
         
 
