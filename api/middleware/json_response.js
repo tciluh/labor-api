@@ -20,5 +20,6 @@ module.exports = (req, res, next) => {
             payload: payload
         });
     }
+    next();
 
 }
