@@ -20,6 +20,7 @@ const express = require('express'); //import express framework
 const bodyParser = require('body-parser'); //import body parser middleware
 const errorHandling = reqlib('/api/middleware/error_handling');
 const jsonResponse = reqlib('/api/middleware/json_response');
+const reqlogging = reqlib('api/middleware/req-logging');
 const app = express();  //get the global express instance
 const http = require('http');
 //register the express instance with our http sever
@@ -33,6 +34,8 @@ const io = socketio(server);
 app.use(bodyParser.json());
 //use the json extension functions since they are used by the routers
 app.use(jsonResponse);
+//use the req logging middleware for debug information
+app.use(reqlogging);
 
 //import all routes
 const protocolRouter = reqlib('/api/routes/protocol_routes');
