@@ -17,11 +17,13 @@ let plugins = require('require-all')({
 
 let models = {};
 //create all plugin instances and generate the export map
-for(let plugin of Object.values(plugins)){
+for(let [filename, plugin] of Object.entries(plugins)){
+    log.debug(`creating model from file: ${filename} module: ${stringify(plugin)} `);
     models[plugin.provides] = plugin.create(Sequelize, db);
 }
 //create all model relations
-for(let plugin of Object.values(plugins)){
+for(let [filename, plugin] of Object.entries(plugins)){
+    log.debug(`adding relations for file: ${filename} , providing module: ${stringify(plugin)} `);
     plugin.relations(models);
 }
 //set module.exports
@@ -31,6 +33,6 @@ module.exports = models;
 db.sync({
     force: true
 })
-    .then(() => console.log('db succesfully synced'))
-    .catch((error) => console.error("db sync failed with error: " + error));
+    .then(() => log.info('db succesfully synced'))
+    .catch((error) => log.error("db sync failed with error: " + stringify(error)));
 

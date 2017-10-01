@@ -21,8 +21,8 @@ function sendRequestError(err, req, res, next){
 
 //a function which logs the error to the console
 function logRequestError(err, req, res, next){
-    console.warn('an error ocurred while performing a request');
-    console.error(JSON.stringify({
+    log.error('an error ocurred while performing a request');
+    log.error(JSON.stringify({
         url: req.url,
         body: req.body,
         method: req.method,

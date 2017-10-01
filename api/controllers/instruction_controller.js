@@ -19,6 +19,7 @@ async function getInstruction(req, res, next) {
 async function updateInstruction(req, res, next) {
     //get the instruction to update
     let instr = Instruction.findById(req.params.id);
+    log.debug(`got instruction to update: ${instr}`);
     //check if there is an instruction to update
     if (!instr) {
         return next("no instruction with the given id found.")
@@ -29,10 +30,9 @@ async function updateInstruction(req, res, next) {
     const allowedFields = ['imageId', 'description'];
     //perform the actual update
     await instr.update(req.body, allowedFields);
+    log.debug(`updated instruction: ${instr}`);
     //return the updated instruction
     res.jsonSuccess(instr);
-
-
 }
 
 module.exports = {

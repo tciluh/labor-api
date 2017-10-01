@@ -25,6 +25,7 @@ async function deleteUser(req, res, next){
         //throw error 
         return next("no user found with the given id");
     }
+    log.debug(`about to delete user: ${stringify(user)}`);
     await user.destroy();
     res.jsonSuccess(`User with ID:  ${req.params.id} sucessfully deleted`);
 }
@@ -32,6 +33,7 @@ async function deleteUser(req, res, next){
 //a route to update the info of a user
 async function updateUser(req, res, next){
     let user = await User.findById(req.params.id);
+    log.debug(`got user to update: ${stringify(user)}`);
     //check if there is a user with the given id
     //console.log(user);
     if(!user){
@@ -40,6 +42,7 @@ async function updateUser(req, res, next){
     }
     //perform the update
     await user.update(req.body);
+    log.debug(`updated user: ${stringify(user)}`);
     //return the updated user
     res.jsonSuccess(user);
 }

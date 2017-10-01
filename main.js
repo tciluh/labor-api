@@ -6,6 +6,15 @@
 //add reqlib to the global scope so that it can be used anywhere
 global.reqlib = require('app-root-path').require;
 
+//require the logging framework
+const jslogging = require('js-logging');
+//and add an instance to the global scope
+global.log = jslogging.colorConsole();
+
+//require the json pretty printer for a nicer console output
+const prettyjson = require('json-stringify-pretty-compact');
+global.stringify = prettyjson;
+
 //express init
 const express = require('express'); //import express framework
 const bodyParser = require('body-parser'); //import body parser middleware

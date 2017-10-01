@@ -34,11 +34,13 @@ class IOPluginManager{
         });
         //assign each plugin to its identifier in the actionMap for an easy lookup
         for(let pluginFile in plugins){
+            log.debug(`got io plugin from file: ${pluginFile} => ${stringify(plugins[pluginFile])}`)
             this.actionMap[plugins[pluginFile].identifier] = plugins[pluginFile];
         }
     }
 
-    handleConnection(socket){ console.log(`new client connection with id: ${socket.id}`)
+    handleConnection(socket){
+        log.info(`new client connection with id: ${socket.id}`)
         //a client connected
         //assign an error handler
         socket.on('error', this.handleError);
@@ -55,24 +57,28 @@ class IOPluginManager{
     }
 
     handleDisconnect(reason){
-        console.info(`client disconnected: ${this}\nreason: ${reason}`);
+        log.info(`client disconnected for reason: ${reason}`);
     }
 
     handleError(error) {
-        console.log(`handle error: ${JSON.stringify(error, null, '  ')}`);
+        log.error(`handle error: ${stringify(error)}`);
     }
 
     handleAction(socket, {identifier, action, ...args }, ack_fn) {
-        console.log(`handle identifier: ${identifier} action: ${action} with args: ${JSON.stringify(args, null, '  ')}`);
+        console.log(`handle identifier: ${identifier} action: ${action} with args: ${stringify(args)}`);
         //make sure we got a valid identifier and action
         if(!identifier || !action){
+            log.warn(`malformed action request on socket: ${socket.id}`);
+            log.warn(`identifier: ${identifier}, action: ${action}, args: ${stringify(args)}`);
             socket.emit('action error', "malformed action request");
         }
         //get the resposible plugin
         const plugin = this.actionMap[identifier];
+        log.debug(`got plugin: ${stringify(plugin)} for identifier: ${identifier}`);
         if(plugin){
             //check if the action is supported by this plugin
             if(!plugin.actions.includes(action)){
+                log.warn(`plugin with identifier: ${identifier} does not support action: ${action} (allowed actions: ${stringify(plugin.actions)})`);
                 return socket.emit('action error', {
                     error: `identifier: ${identifier} does not support action: ${action}`
                 })
@@ -82,9 +88,11 @@ class IOPluginManager{
             //plugin handler function
             this.performPluginAction(plugin, action, args, ack_fn)
                 .then(obj => {
+                    log.debug(`emitting: ${stringify(obj)} on result channel`);
                     socket.emit('result', obj);
                 })
                 .catch(error => {
+                    log.error(`plugin threw an error while getting result: ${stringify(error)}`);
                     socket.emit('action error', {
                         error: error.message,
                         identifier: identifier,
@@ -95,6 +103,7 @@ class IOPluginManager{
                 });
         }
         else{
+            log.warn(`no plugin found for identifier: ${identifier}`);
             socket.emit('action error', {
                 error: 'identifier not found'
             });
@@ -103,18 +112,23 @@ class IOPluginManager{
 
     async performPluginAction(plugin, action, args, ack_fn){
         //create IOResult entry
+        log.debug(`will create IOResult with id: ${plugin.identifier} and action: ${action} and args: ${args}`);
         let result = await IOResult.create({
             identifier: plugin.identifier,
             action: action
         });
+        log.debug(`created io result: ${stringify(result)}`);
         //return id to the client
         ack_fn(result.id);
         //call the plugin handler
+        log.debug(`calling plugin handler`);
         let val = await plugin.handler(action, args);
+        log.debug(`got result: ${val}`);
         //update the ioresult
         await result.update({
             value: val
         });
+        log.debug(`updated ioresult: ${stringify(result)}`);
         //return the object to emit on the socket
         return {
             id: result.id,
