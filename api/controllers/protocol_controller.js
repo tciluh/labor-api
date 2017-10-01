@@ -6,6 +6,7 @@ const Protocol = Model.Protocol;
 const Instruction = Model.Instruction;
 const Result = Model.Result;
 const Image = Model.Image;
+const IOAction = Model.IOAction;
 
 //global data fetch option to only fetch the required fields from the db
 //this allows us to simply return the sequelize result as json to the user
@@ -16,20 +17,26 @@ const findOptions = {
         model: Instruction,
         as: 'instructions',
         attributes: ['id', 'description'],
-        include: [{
-            model: Result,
-            as: 'results',
-            attributes: ['id', 'description', 'targetInstructionId'],
-            include: [{
-                model: Image,
-                as: 'image',
-                attributes: ['id']
-            }]
-        },
+        include: [
+            {
+                model: Result,
+                as: 'results',
+                attributes: ['id', 'description', 'targetInstructionId'],
+                include: [{
+                    model: Image,
+                    as: 'image',
+                    attributes: ['id']
+                }]
+            },
             {
                 model: Image,
                 as: 'image',
                 attributes: ['id']
+            },
+            {
+                model: IOAction ,
+                as: 'actions',
+                attributes: ['identifier', 'action', 'arguments']
             }
         ]
     }]
@@ -52,7 +59,7 @@ async function getProtocol(req, res, next) {
 
 async function addProtocol(req, res, next) {
     //XXX: transactions please!
-    
+
     //only allow the name and description fields to be set at first.
     //the steps and instructions get parsed seperatly
     const allowedFields = ['name', 'description'];
@@ -66,9 +73,9 @@ async function addProtocol(req, res, next) {
         throw new Error("instructions array malformed");
     //iterative approach
     let createdInstructions = [];//all instructions in their creation order
-    let createdResults = [];//array of objects where 
-                            //input => input result json,
-                            //instance => created result instance
+    let createdResults = [];//array of objects where
+    //input => input result json,
+    //instance => created result instance
     let instructions = req.body.instructions;//alias for less code
     //first loop insert all instructions + results
     //but do not set target instructions yet.
@@ -83,7 +90,7 @@ async function addProtocol(req, res, next) {
                 isFirst: true
             });
         }
-        //set the protocol 
+        //set the protocol
         await createdInstruction.setProtocol(protocol);
         //save the id in the createdInstructions array
         createdInstructions[i] = createdInstruction;
@@ -95,13 +102,13 @@ async function addProtocol(req, res, next) {
         //create each result
         for(let result of input.results){
             let createdResult = await Result.create(result, {
-                 fields: ['description', 'imageId']
-            }); 
+                fields: ['description', 'imageId']
+            });
             //set the protocol
             await createdResult.setProtocol(protocol);
             //set the correct source instruction
             await createdResult.setSourceInstruction(createdInstruction);
-            //save for the second run since we cant set the 
+            //save for the second run since we cant set the
             //target instruction here because it havent been created yet.
             createdResults.push({
                 input: result,
