@@ -115,7 +115,8 @@ class IOPluginManager{
         log.debug(`will create IOResult with id: ${plugin.identifier} and action: ${action} and args: ${args}`);
         let result = await IOResult.create({
             identifier: plugin.identifier,
-            action: action
+            action: action,
+            arguments: args
         });
         log.debug(`created io result: ${stringify(result)}`);
         //return id to the client

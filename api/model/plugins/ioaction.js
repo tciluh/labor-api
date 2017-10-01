@@ -19,7 +19,7 @@ module.exports.create = (sequelize, db) => {
             },
             arguments: {
                 type: sequelize.JSON,
-                allowNull: false
+                allowNull: true
             }
 
         }
