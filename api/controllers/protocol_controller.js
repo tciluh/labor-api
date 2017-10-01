@@ -16,22 +16,12 @@ const findOptions = {
     include: [{
         model: Instruction,
         as: 'instructions',
-        attributes: ['id', 'description'],
+        attributes: ['id', 'description', 'imageId'],
         include: [
             {
                 model: Result,
                 as: 'results',
-                attributes: ['id', 'description', 'targetInstructionId'],
-                include: [{
-                    model: Image,
-                    as: 'image',
-                    attributes: ['id']
-                }]
-            },
-            {
-                model: Image,
-                as: 'image',
-                attributes: ['id']
+                attributes: ['id', 'description', 'targetInstructionId', 'imageId'],
             },
             {
                 model: IOAction ,
