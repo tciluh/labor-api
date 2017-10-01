@@ -3,7 +3,7 @@ A laboratory information server written in node that makes protocols available t
 
 ## Depedencys
 - `nodejs`
-- `sqlite3`
+- `postgresql`
 
 ## Installation
 - make sure that all dependency's are installed
