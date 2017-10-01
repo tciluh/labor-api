@@ -115,6 +115,8 @@ async function addProtocol(req, res, next) {
                 instance: createdResult
             });
         }
+        //the user does not have to specify any actions;
+        if(!input.actions) continue;
         //create each action
         let createdActions = [];
         for(let action of input.actions){
