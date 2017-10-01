@@ -1,6 +1,8 @@
-module.exports = (sequelize, db, context) => {
-    //A Table which contains every result ever retrieved from an IOPlugin
-    const IOResult = db.define('ioresult',
+module.exports.provides = "IOResult";
+module.exports.create = (sequelize, db) => {
+    //a table which contains all results ever recieved
+    //from any plugin handler 
+    return db.define('ioresult',
         {
             identifier: {
                 type:sequelize.STRING,
@@ -38,29 +40,8 @@ module.exports = (sequelize, db, context) => {
             }
         },
     );
+}
 
-    //A Table which contains all IOPlugin Steps associated with an Instruction
-    const IOAction = db.define('ioaction',
-        {
-            identifier: {
-                type:sequelize.STRING,
-                validate: {
-                    notEmpty: true
-                },
-                allowNull: false
-            },
-            action: {
-                type:sequelize.STRING,
-                validate: {
-                    notEmpty: true
-                },
-                allowNull: false
-            },
-
-        }
-    );
-
-    //add exports to context
-    context.IOResult = IOResult;
-    context.IOAction = IOAction;
+module.exports.relations = (context) => {
+    //stub
 }

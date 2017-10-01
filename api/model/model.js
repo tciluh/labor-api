@@ -9,17 +9,23 @@ const db = new Sequelize('labor-api', 'labor', null, {
 });
 
 //use require all to load all files in the plugins subdirectory
-//by using a resolve function we automagically call the exported
-//plugin function which add its classes to the exportsOrms Map
-let exportedORMs = {};
 let plugins = require('require-all')({
     dirname: this.pluginDir ? this.pluginDir :__dirname + '/plugins/',
-    filter: /^(.+)\.js$/,
-    resolve: (plugin_model) => plugin_model(Sequelize,db,exportedORMs),
+    filter: /^(.+)\.js$/, //make sure dont require the js.example file
     recursive: false
 });
-//export all gathered model classes
-module.exports = exportedORMs;
+
+let models = {};
+//create all plugin instances and generate the export map
+for(let plugin of Object.values(plugins)){
+    models[plugin.provides] = plugin.create(Sequelize, db);
+}
+//create all model relations
+for(let plugin of Object.values(plugins)){
+    plugin.relations(models);
+}
+//set module.exports
+module.exports = models;
 
 //sync the database (meaning creating the tables if not existent)
 db.sync({
