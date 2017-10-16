@@ -1,7 +1,9 @@
 "use strict;"
 
 //import IOResult from model
-const IOResult = reqlib('/api/model/model').IOResult;
+const model = reqlib('/api/model/model');
+const IOResult = model.IOResult;
+const IOAction = model.IOAction;
 
 class IOPluginManager{
     constructor(io, pluginDir){
@@ -50,10 +52,20 @@ class IOPluginManager{
         //we need lodash's partial here since socketio binds the this variable to the socket
         //on which the event occured when calling the handler function. we cant let this happen
         //because we need access to this class which normally bound to the this variable
-        //therefore we force a this binding to this class with .bind()
-        //and the apply lodash's partial to fill in the socket variable for us
-        const partial = require('lodash.partial');
-        socket.on('action', partial(this.handleAction.bind(this), socket));
+        //therefore we save a reference to the correct this pointer
+        //and use it inside the callback to call the class function
+        const self = this;
+        socket.on('action', (action_id, ack_fn) => {
+            //socket is now bound to this
+            let socket = this;
+            self.handleAction(self, socket, action_id, ack_fn)
+                .then(() => {
+                    log.info(`action with id: ${action_id} succesfully handled`);
+                })
+                .catch(error => {
+                    self.handleError(error);
+                })
+        })
     }
 
     handleDisconnect(reason){
@@ -61,21 +73,29 @@ class IOPluginManager{
     }
 
     handleError(error) {
-        log.error(`handle error: ${stringify(error)}`);
+        log.error(`handle error: ${error}`);
+        log.error(stringify(error));
     }
 
-    handleAction(socket, {identifier, action, ...args }, ack_fn) {
-        console.log(`handle identifier: ${identifier} action: ${action} with args: ${stringify(args)}`);
-        //make sure we got a valid identifier and action
-        if(!identifier || !action){
+    async handleAction(self, socket, action_id, ack_fn) {
+        log.debug(`handle action with id: ${action_id}`);
+        //make sure we got a valid action_id
+        if(!action_id){
             log.warn(`malformed action request on socket: ${socket.id}`);
-            log.warn(`identifier: ${identifier}, action: ${action}, args: ${stringify(args)}`);
+            log.warn(`action_id: ${action_id} is not valid`);
             socket.emit('action error', "malformed action request");
         }
+        //fetch the related IOAction
+        const ioaction = await IOAction.findById(action_id);
+        if(!ioaction) throw new Error(`cant find action with id: ${action_id}`);
+        //define shorthands
+        const identifier = ioaction.identifier;
+        const action = ioaction.action;
+        const args = ioaction.arguments;
         //get the resposible plugin
-        const plugin = this.actionMap[identifier];
-        log.debug(`got plugin: ${stringify(plugin)} for identifier: ${identifier}`);
+        const plugin = self.actionMap[identifier];
         if(plugin){
+            log.debug(`got plugin: ${stringify(plugin)} for identifier: ${identifier}`);
             //check if the action is supported by this plugin
             if(!plugin.actions.includes(action)){
                 log.warn(`plugin with identifier: ${identifier} does not support action: ${action} (allowed actions: ${stringify(plugin.actions)})`);
@@ -86,21 +106,21 @@ class IOPluginManager{
             //perform the plugin action
             //this creates an IOResult entry and runs the
             //plugin handler function
-            this.performPluginAction(plugin, action, args, ack_fn)
-                .then(obj => {
-                    log.debug(`emitting: ${stringify(obj)} on result channel`);
-                    socket.emit('result', obj);
-                })
-                .catch(error => {
-                    log.error(`plugin threw an error while getting result: ${stringify(error)}`);
-                    socket.emit('action error', {
-                        error: error.message,
-                        identifier: identifier,
-                        action: action,
-                        uniqueid: 0,
-                        args: args
-                    });
+            try{
+                let obj = await self.performPluginAction(plugin, action, args, ack_fn);
+                log.debug(`emitting: ${stringify(obj)} on result channel`);
+                socket.emit('result', obj);
+            }
+            catch(error){
+                log.error(`plugin threw an error while getting result: ${stringify(error)}`);
+                socket.emit('action error', {
+                    error: error.message,
+                    identifier: identifier,
+                    action: action,
+                    uniqueid: 0,
+                    args: args
                 });
+            }
         }
         else{
             log.warn(`no plugin found for identifier: ${identifier}`);
