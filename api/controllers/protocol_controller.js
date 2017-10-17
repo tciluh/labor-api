@@ -26,7 +26,7 @@ const findOptions = {
             {
                 model: IOAction ,
                 as: 'actions',
-                attributes: ['identifier', 'action', 'arguments']
+                attributes: ['identifier', 'action', 'arguments', 'equationIdentifier']
             }
         ]
     }]
