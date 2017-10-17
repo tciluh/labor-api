@@ -16,7 +16,7 @@ const findOptions = {
     include: [{
         model: Instruction,
         as: 'instructions',
-        attributes: ['id', 'description', 'imageId'],
+        attributes: ['id', 'description', 'imageId', 'equation'],
         include: [
             {
                 model: Result,
