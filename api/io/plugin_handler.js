@@ -57,7 +57,6 @@ class IOPluginManager{
         const self = this;
         socket.on('action', (action_id, ack_fn) => {
             //socket is now bound to this
-            let socket = this;
             self.handleAction(self, socket, action_id, ack_fn)
                 .then(() => {
                     log.info(`action with id: ${action_id} succesfully handled`);
@@ -81,8 +80,8 @@ class IOPluginManager{
         log.debug(`handle action with id: ${action_id}`);
         //make sure we got a valid action_id
         if(!action_id){
-            log.warn(`malformed action request on socket: ${socket.id}`);
-            log.warn(`action_id: ${action_id} is not valid`);
+            log.warning(`malformed action request on socket: ${socket.id}`);
+            log.warning(`action_id: ${action_id} is not valid`);
             socket.emit('action error', "malformed action request");
         }
         //fetch the related IOAction
@@ -98,7 +97,7 @@ class IOPluginManager{
             log.debug(`got plugin: ${stringify(plugin)} for identifier: ${identifier}`);
             //check if the action is supported by this plugin
             if(!plugin.actions.includes(action)){
-                log.warn(`plugin with identifier: ${identifier} does not support action: ${action} (allowed actions: ${stringify(plugin.actions)})`);
+                log.warning(`plugin with identifier: ${identifier} does not support action: ${action} (allowed actions: ${stringify(plugin.actions)})`);
                 return socket.emit('action error', {
                     error: `identifier: ${identifier} does not support action: ${action}`
                 })
@@ -123,7 +122,7 @@ class IOPluginManager{
             }
         }
         else{
-            log.warn(`no plugin found for identifier: ${identifier}`);
+            log.warning(`no plugin found for identifier: ${identifier}`);
             socket.emit('action error', {
                 error: 'identifier not found'
             });
