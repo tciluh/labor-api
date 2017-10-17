@@ -75,7 +75,7 @@ async function addProtocol(req, res, next) {
         log.debug(`will create db instruction from: ${stringify(input)}`);
         //insert into the db
         let createdInstruction = await Instruction.create(input,{
-            fields: ['description', 'imageId']
+            fields: ['description', 'imageId', 'equation']
         });
         log.debug(`created db instruction: ${stringify(createdInstruction)}`);
         //make sure to mark the first instruction
