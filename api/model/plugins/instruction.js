@@ -2,6 +2,7 @@ module.exports.provides = "Instruction";
 module.exports.create = (sequelize, db) => {
     //each instruction has a description
     //and a flag whether or not its the first intruction
+    //and an optional equation if the client should display a summary of calculated values
     //for the corresponding protocol
     return db.define('instruction', {
         description: {
@@ -11,6 +12,10 @@ module.exports.create = (sequelize, db) => {
         isFirst: {
             type: sequelize.BOOLEAN,
             defaultValue: false
+        },
+        equation: {
+            type: sequelize.TEXT,
+            allowNull: true
         }
     });
 }

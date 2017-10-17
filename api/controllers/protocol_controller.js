@@ -16,7 +16,7 @@ const findOptions = {
     include: [{
         model: Instruction,
         as: 'instructions',
-        attributes: ['id', 'description', 'imageId'],
+        attributes: ['id', 'description', 'imageId', 'equation'],
         include: [
             {
                 model: Result,
@@ -26,7 +26,7 @@ const findOptions = {
             {
                 model: IOAction ,
                 as: 'actions',
-                attributes: ['identifier', 'action', 'arguments']
+                attributes: ['identifier', 'action', 'arguments', 'equationIdentifier']
             }
         ]
     }]
@@ -75,7 +75,7 @@ async function addProtocol(req, res, next) {
         log.debug(`will create db instruction from: ${stringify(input)}`);
         //insert into the db
         let createdInstruction = await Instruction.create(input,{
-            fields: ['description', 'imageId']
+            fields: ['description', 'imageId', 'equation']
         });
         log.debug(`created db instruction: ${stringify(createdInstruction)}`);
         //make sure to mark the first instruction
@@ -116,19 +116,20 @@ async function addProtocol(req, res, next) {
             });
         }
         //the user does not have to specify any actions;
-        if(!input.actions) continue;
-        //create each action
-        let createdActions = [];
-        for(let action of input.actions){
-            log.debug(`creating IOAction from input: ${action}`);
-            let createdAction = await IOAction.create(action, {
-                fields: ['identifier', 'action', 'arguments']
-            }) 
-            log.debug(`created IOAction: ${createdAction}`);
-            createdActions.push(createdAction);
+        if(input.actions && input.actions instanceof Array && input.actions.length > 0){
+            //create each action
+            let createdActions = [];
+            for(let action of input.actions){
+                log.debug(`creating IOAction from input: ${action}`);
+                let createdAction = await IOAction.create(action, {
+                    fields: ['identifier', 'action', 'arguments', 'equationIdentifier']
+                })
+                log.debug(`created IOAction: ${createdAction}`);
+                createdActions.push(createdAction);
+            }
+            //add to instruction
+            await createdInstruction.setActions(createdActions);
         }
-        //add to instruction
-        await createdInstruction.setActions(createdActions);
     }
     //second loop fix all the target instructions for each result
     //fancy destructuring syntax.

@@ -20,6 +20,13 @@ module.exports.create = (sequelize, db) => {
             arguments: {
                 type: sequelize.JSON,
                 allowNull: true
+            },
+            equationIdentifier: {
+                type: sequelize.STRING,
+                allowNull: false,
+                validate: {
+                    notEmpty: true 
+                }
             }
 
         }
