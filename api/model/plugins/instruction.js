@@ -3,6 +3,7 @@ module.exports.create = (sequelize, db) => {
     //each instruction has a description
     //and a flag whether or not its the first intruction
     //and an optional equation if the client should display a summary of calculated values
+    //and an optional timerDuration in seconds for which the client should wait
     //for the corresponding protocol
     return db.define('instruction', {
         description: {
