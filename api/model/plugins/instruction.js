@@ -3,6 +3,7 @@ module.exports.create = (sequelize, db) => {
     //each instruction has a description
     //and a flag whether or not its the first intruction
     //and an optional equation if the client should display a summary of calculated values
+    //and an optional timerDuration in seconds for which the client should wait
     //for the corresponding protocol
     return db.define('instruction', {
         description: {
@@ -15,8 +16,23 @@ module.exports.create = (sequelize, db) => {
         },
         equation: {
             type: sequelize.TEXT,
-            allowNull: true
+            allowNull: true,
+            defaultValue: null
+        },
+        timerDuration: {
+            type: sequelize.INTEGER,
+            allowNull: true,
+            defaultValue: null,
+            validate: { min: 0 }
         }
+    }, {
+        validate: {
+            eitherEquationOrTimer() {
+                if(this.equation != null && this.timerDuration != null){
+                    throw new Error('Define either a timerDuration or equation but not both.')
+                }
+            }    
+        } 
     });
 }
 
