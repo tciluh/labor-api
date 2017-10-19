@@ -15,8 +15,23 @@ module.exports.create = (sequelize, db) => {
         },
         equation: {
             type: sequelize.TEXT,
-            allowNull: true
+            allowNull: true,
+            defaultValue: null
+        },
+        timerDuration: {
+            type: sequelize.INTEGER,
+            allowNull: true,
+            defaultValue: null,
+            validate: { min: 0 }
         }
+    }, {
+        validate: {
+            eitherEquationOrTimer() {
+                if(this.equation != null && this.timerDuration != null){
+                    throw new Error('Define either a timerDuration or equation but not both.')
+                }
+            }    
+        } 
     });
 }
 
