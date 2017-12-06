@@ -15,6 +15,25 @@ global.log = jslogging.colorConsole();
 const prettyjson = require('json-stringify-pretty-compact');
 global.stringify = prettyjson;
 
+//load config
+const nconf = require('nconf')
+nconf.argv()
+    .file({
+        file: './config.yml',
+        format: require('nconf-yaml')
+    })
+    .defaults({
+        host: '0.0.0.0',
+        port: 3000,
+        development: true,
+        dbhost: 'localhost',
+        dbname: 'labor-api',
+        dbuser: 'labor',
+        dbpw: ''
+    })
+//export global config object
+global.config = nconf.get()
+
 //express init
 const express = require('express'); //import express framework
 const bodyParser = require('body-parser'); //import body parser middleware
@@ -63,7 +82,9 @@ const IOPluginManager = reqlib('/api/io/plugin_handler');
 const pluginManager = new IOPluginManager(io);
 
 //use supplied port or default 3000;
-const port = process.env.PORT || 3000; 
 //actually start the server and print a simple
 //message to notify the user something is happening
-server.listen(port, () => console.log("http server started")); 
+server.listen({
+    host: config.host,
+    port: config.port
+}, () => console.log("http server started")); 

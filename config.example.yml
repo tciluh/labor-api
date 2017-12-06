@@ -1,0 +1,7 @@
+host: 0.0.0.0 # the ip interface on which to listen on
+port: 3000 # the port to listen on
+dbhost: localhost # the host which contains the postgres database
+dbname: labor-api # the name of the database which will hold the labor-api data
+dbuser: labor # the database user which will be used to access postgres
+dbpw: #the password of the database user
+

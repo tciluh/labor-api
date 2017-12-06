@@ -3,10 +3,14 @@
 //sequelize import
 const Sequelize = require('sequelize');
 //init db connection
-const db = new Sequelize('labor-api', 'labor', null, {
-    host: 'localhost',
-    dialect: 'postgres',
-});
+const db = new Sequelize(
+    config.dbname,
+    config.dbuser,
+    config.dbpw,
+    {
+        host: config.dbhost,
+        dialect: 'postgres',
+    });
 
 //use require all to load all files in the plugins subdirectory
 let plugins = require('require-all')({
@@ -31,7 +35,7 @@ module.exports = models;
 
 //sync the database (meaning creating the tables if not existent)
 db.sync({
-    force: true
+    force: config.development
 })
     .then(() => log.info('db succesfully synced'))
     .catch((error) => log.error("db sync failed with error: " + stringify(error)));
