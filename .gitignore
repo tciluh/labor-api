@@ -3,3 +3,4 @@ node_modules/
 sop.sqlite
 images/
 .vscode/
+config.yml
