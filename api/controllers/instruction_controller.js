@@ -4,9 +4,13 @@
 const Model = reqlib('/api/model/model')
 const Instruction = Model.Instruction;
 
+const allowedFields = ['id', 'description', 'equation', 'timerDuration', 'imageId', 'isFirst']
+const findOptions = { attributes: allowedFields };
+const updateableFields = ['description', 'equation', 'timerDuration', 'imageId']
+
 async function getInstruction(req, res, next) {
     //find by id
-    const instr = Instruction.findById(req.params.id);
+    const instr = await Instruction.findById(req.params.id, findOptions);
     //check if we found something.
     if (instr) {
         //return 
@@ -18,18 +22,14 @@ async function getInstruction(req, res, next) {
 }
 async function updateInstruction(req, res, next) {
     //get the instruction to update
-    let instr = Instruction.findById(req.params.id);
+    let instr = await Instruction.findById(req.params.id, findOptions);
     log.debug(`got instruction to update: ${instr}`);
     //check if there is an instruction to update
     if (!instr) {
         return next("no instruction with the given id found.")
     }
-    //we only allow image and description updates so that
-    //a malicious attacker can't change the protocol structure
-    //over this interface
-    const allowedFields = ['imageId', 'description'];
     //perform the actual update
-    await instr.update(req.body, allowedFields);
+    await instr.update(req.body, updateableFields);
     log.debug(`updated instruction: ${instr}`);
     //return the updated instruction
     res.jsonSuccess(instr);

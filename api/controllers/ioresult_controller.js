@@ -4,9 +4,13 @@
 const Model = reqlib('/api/model/model')
 const IOResult = Model.IOResult;
 
+const allowedFields = ['id', 'createdAt', 'identifier', 'action', 'action', 'arguments', 'value']
+
 async function getIOResult(req, res, next) {
     //find by id
-    const result = IOResult.findById(req.params.id);
+    const result = await IOResult.findById(req.params.id, {
+        attributes: allowedFields 
+    });
     //if there is result with the given id
     if (result) {
         //return it
