@@ -4,9 +4,13 @@
 const Model = reqlib('/api/model/model')
 const Result = Model.Result;
 
+const allowedFields = ['id', 'description', 'sourceInstructionId', 'targetInstructionId', 'imageId'];
+const findOptions = { attributes: allowedFields };
+const updateableFields = ['description', 'imageId']
+
 async function getResult(req, res, next) {
     //find by id
-    const result = Result.findById(req.params.id);
+    const result = await Result.findById(req.params.id, findOptions);
     //if there is result with the given id
     if (result) {
         //return it
@@ -18,16 +22,12 @@ async function getResult(req, res, next) {
 }
 async function updateResult(req, res, next) {
     //get the result to update
-    let result = Result.findById(req.params.id);
+    let result = await Result.findById(req.params.id, findOptions);
     if (!result) {
         return next("no result with the given id found.");
     }
-    //we only allow image and description updates so that
-    //a malicious attacker can't change the protocol structure
-    //over this interface
-    const allowedFields = ['imageId', 'description'];
     //perform the actual update
-    await result.update(req.body, allowedFields);
+    await result.update(req.body, updateableFields);
     //return the updated result
     res.jsonSuccess(result);
 }

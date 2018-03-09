@@ -8,6 +8,9 @@ const del = require('del');
 //import app root path to get the correct path for the images
 const appRoot = require('app-root-path');
 
+
+const allowedFields = ['id', 'contentType']
+const findOptions = { attributes: allowedFields }
 //routing function for adding an image
 async function addImage(req, res, next) {
     if(!req.file) return next("image upload failed, file is not defined after upload");
@@ -17,7 +20,7 @@ async function addImage(req, res, next) {
             filename: req.file.filename,
             contentType: req.file.mimetype //needs to be saved to allow proper downloading
         });
-        res.jsonSuccess(image);
+        res.jsonSuccess(await Image.findById(image.id, findOptions));
     }
 }
 
@@ -43,7 +46,7 @@ async function updateImage(req, res, next){
     //delete the old file
     await del([`images/${oldFilename}`]);
     //return the updated image db entry
-    res.jsonSuccess(image);
+    res.jsonSuccess(await Image.findById(image.id, findOptions));
 }
 
 //routing function for deleting an image
