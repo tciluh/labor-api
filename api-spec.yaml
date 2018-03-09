@@ -1,0 +1,412 @@
+swagger: '2.0'
+info:
+  description: |
+    This is the RestAPI of the labor-api developed by Malte Bargholz for the
+    Institute of technical Chemistry at the Leibniz University Hanover.
+  version: 1.0.0
+  title: LaborAPI
+  contact:
+    email: malte@screenri.de
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+host: 130.75.115.47:3000
+basePath: /
+tags:
+- name: protocol
+  description: Anything that has something todo with SOPs aka Protocols
+- name: protocol-steps
+  description: Anyhting that has to do with parts of a protocol such as Instructions and Results. 
+- name: image
+  description: Anything that has something todo with images.
+- name: action
+  description: anything related to IOActions and IOResults
+schemes:
+- http
+paths:
+  /ioresult/{ioresultID}:
+    parameters:
+    - in: path
+      name: ioresultID
+      required: true
+      type: integer
+      description: The ID of the IOResult.
+    get:
+      tags:
+      - action
+      summary: Returns the IOResult with the given id.
+      produces:
+      - application/json
+      responses:
+        200:
+          description: The IOResult was found.
+          schema:
+            $ref: '#/definitions/IOResult'
+  /instruction/{instructionID}:
+    parameters:
+      - in: path
+        name: instructionID
+        required: true
+        type: integer
+        description: The ID of the instruction in question
+    get:
+      tags:
+      - protocol-steps
+      summary: Returns a instruction
+      produces:
+      - application/json
+      responses:
+        200:
+          description: The instruction was found.
+          schema:
+            $ref: '#/definitions/Instruction'
+    put:
+      tags:
+      - protocol-steps
+      summary: Updates a instruction.
+      produces:
+      - application/json
+      consumes:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Updated fields for this instruction. Only imageId, description, equation and timerDuration are currently updateable.
+        schema:
+          $ref: '#/definitions/Instruction'
+      responses:
+        200:
+          description: The update was successful
+          schema:
+            $ref: '#/definitions/Instruction'
+      
+  /result/{resultID}:
+    parameters:
+      - in: path
+        name: resultID
+        required: true
+        type: integer
+        description: The ID of the result in question
+    get:
+      tags:
+      - protocol-steps
+      summary: Returns a result
+      produces:
+      - application/json
+      responses:
+        200:
+          description: The result was found.
+          schema:
+            $ref: '#/definitions/Result'
+    put:
+      tags:
+      - protocol-steps
+      summary: Updates a result.
+      produces:
+      - application/json
+      consumes:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Updated fields for this result. Only imageId and description are currently updateable.
+        schema:
+          $ref: '#/definitions/Result'
+      responses:
+        200:
+          description: The update was successful
+          schema:
+            $ref: '#/definitions/Instruction'
+  /protocol:
+    get:
+      tags: 
+      - protocol
+      summary: Get All Protocols available
+      produces: 
+      - application/json
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/Protocol'
+        500:
+          description: Something went wrong.
+    post:
+      tags:
+      - protocol
+      summary: Create a protocol
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        required: true
+        description: Protocol object to be added to the store. Be mindful that targetInstructionIds refer to the array index of the next instruction inside the instructions array.
+        schema:
+          $ref: '#/definitions/Protocol'
+      responses:
+        200:
+           description: The insert was successful. The returned Protocol object contains correct targetInstructionIds.
+           schema:
+            $ref: '#/definitions/Protocol'
+  /protocol/{protocolID}:
+    parameters:
+      - in: path
+        name: protocolID
+        required: true
+        type: integer
+        description: The ID of the protocol in question
+    get:
+      tags:
+      - protocol
+      summary: Get a protocol by its id
+      produces:
+        - application/json
+      responses:
+        200:
+          description: The protocol was found.
+          schema:
+            $ref: '#/definitions/Protocol'
+    put:
+      tags:
+      - protocol
+      summary: Updates a protocol. Currently only name and description are updateable via this way. Refer to the /result and /instruction routes to update individual instructions and results.
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: protocol
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+              description: The new name of this protocol.
+            description:
+              type: string
+              description: The new description of this protocol.
+      responses:
+        200: 
+          description: Update successfull
+          schema: 
+            $ref: '#/definitions/Protocol'
+    delete:
+      tags:
+      - protocol
+      summary: Deletes a protocol.
+      produces:
+      - application/json
+      responses:
+        200: 
+          description: The deletion was succesful
+          schema:
+            $ref: '#/definitions/ApiResponse'
+  /image:
+    post:
+      tags:
+        - image
+      summary: Adds an image to the API. Make sure to insert each referenced image into the API before attempting to insert a protocol.
+      parameters:
+        - in: formData
+          name: image
+          description: The image to add
+          type: file
+      consumes:
+        - multipart/form-data
+      produces:
+      - application/json
+      responses:
+        200:
+          description: The image was saved succesfully
+          schema:
+            $ref: '#/definitions/Image'
+      
+  /image/{imageId}:
+    parameters:
+      - in: path
+        name: imageId
+        required: true
+        type: integer
+        description: The Id of the image in question.
+    get:
+      tags:
+      - image
+      summary: Downloads the image with the given id.
+      produces:
+      - image/*
+      responses:
+        200:
+          description: The image was found.
+        500:
+          description: No image with the given id was found
+          schema:
+            $ref: '#/definitions/ApiResponse'
+    delete:
+      tags:
+      - image
+      summary: Deletes a given image.
+      produces:
+      - application/json
+      responses:
+        200: 
+          description: The deletion was succesful
+          schema:
+            $ref: '#/definitions/ApiResponse'
+    put:
+      tags:
+      - image
+      summary: Updates the given image.
+      parameters:
+        - in: formData
+          name: image
+          description: The image to add
+          type: file
+      produces:
+      - application/json
+      consumes:
+      - multipart/form-data
+      responses:
+        200:
+          description: The image file was updated successfully
+          schema:
+            $ref: '#/definitions/Image'
+      
+definitions:
+  IOResult:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: The unqiue id of the IOResult
+      identifier:
+        type: string
+        description: The identifier of the IOPlugin used to generate this result.
+      action:
+        type: string
+        description: The action which was used on the IOPlugin to generate this result.
+      arguments:
+        type: object
+        description: The parameters passed to the IOPlugin to generate this result.
+      value:
+        type: object
+        description: The value returned by IOPlugin
+      createdAt:
+        type: string
+        format: datetime
+        description: The timestamp at which this IOResult was generated.
+  Image:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: The id of the uploaded image. Can be used to reference this image in a Protocol.
+      filename:
+        type: string
+        description: The filename used by server internally.
+      contentType:
+        type: string
+        description: The content type of the saved image
+      updatedAt:
+        type: string
+        format: datetime
+        description: The timestamp this image was last updated
+      createdAt:
+        type: string
+        format: datetime
+        description: The timestamp at which this image was created
+  Result:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: The unique id of this result.
+      description:
+        type: string
+        description: Text describing the outcome of an Instruction.
+      imageId:
+        type: integer
+        description: The associated image by id.
+      targetInstructionId:
+        type: integer
+        description: Id of the instruction that should be carried out next if this result happened. On protocol creation this refers to the array index of the next Instruction in the instructions array. May be null if the SOP is finished after this result.
+  Instruction:
+    type: object
+    required:
+    - id
+    - description
+    - isFirst
+    properties:
+      id:
+        type: integer
+        description: The unique id of this instruction.
+      description: 
+        type: string
+        description: A short text describing what should be done in this step of the protocol.
+      imageId:
+        type: integer
+        description: The associated image by id.
+      equation:
+        type: string
+        description: An optional 
+      timerDuration:
+        type: integer
+      isFirst:
+        type: boolean
+        description: Whether or not this is the first instruction in the corresponding protocol.
+      results:
+        type: array
+        description: One or more outcomes of this instruction represented by Result objects.
+        items:
+          $ref: '#/definitions/Result'
+  Protocol:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+        description: A short name for this SOP
+      description:
+        type: string
+        description: A longer description for this SOP
+      instructions:
+        type: array
+        description: An array of one or more Instructions, each representing a step in this SOP.
+        items:
+          $ref: '#/definitions/Instruction'
+  ApiError:
+    type: object
+    properties:
+      url: 
+        type: string
+        description: The that was accessed on the API
+      body:
+        type: object
+        description: The body that was passed to the API
+      method:
+        type: string
+        description: The HTTP Method used
+      params:
+        type: object
+        description: Query Parameters passed to the API
+      error: 
+        type: string
+        description: A string describing the internal error.
+  ApiResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+        description: Whether or not the API Call was successful.
+      payload:
+        type: object
+        description: Either the object returned by the api or an object describing the error.
+      message:
+        type: object
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
