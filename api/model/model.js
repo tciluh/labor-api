@@ -31,7 +31,11 @@ for(let [filename, plugin] of Object.entries(plugins)){
     plugin.relations(models);
 }
 //set module.exports
-module.exports = models;
+module.exports = {
+    Models: models,
+    DBInstance: db,
+    Sequelize: Sequelize
+}
 
 //sync the database (meaning creating the tables if not existent)
 db.sync({

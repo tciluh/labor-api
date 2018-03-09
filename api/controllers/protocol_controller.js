@@ -2,11 +2,13 @@
 
 //import ORM Object
 const Model = reqlib('/api/model/model')
-const Protocol = Model.Protocol;
-const Instruction = Model.Instruction;
-const Result = Model.Result;
-const Image = Model.Image;
-const IOAction = Model.IOAction;
+const Models = Model.Models
+const db = Model.DBInstance
+const Protocol = Models.Protocol;
+const Instruction = Models.Instruction;
+const Result = Models.Result;
+const Image = Models.Image;
+const IOAction = Models.IOAction;
 
 //global data fetch option to only fetch the required fields from the db
 //this allows us to simply return the sequelize result as json to the user

@@ -1,7 +1,7 @@
 'use strict;' //strict compiler mode. see main.js
 
 //import ORM Object
-const Model = reqlib('/api/model/model')
+const Model = reqlib('/api/model/model').Models
 const IOResult = Model.IOResult;
 
 const allowedFields = ['id', 'createdAt', 'identifier', 'action', 'action', 'arguments', 'value']
