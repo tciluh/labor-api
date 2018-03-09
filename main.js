@@ -61,13 +61,11 @@ const protocolRouter = reqlib('/api/routes/protocol_routes');
 const instructionRouter = reqlib('/api/routes/instruction_routes');
 const resultRouter = reqlib('/api/routes/result_routes');
 const ioResultRouter = reqlib('/api/routes/ioresult_routes');
-const userRouter = reqlib('/api/routes/user_routes');
 const imageRouter = reqlib('/api/routes/image_routes');
 app.use('/protocol/', protocolRouter);
 app.use('/instruction/', instructionRouter);
 app.use('/result/', resultRouter);
 app.use('/ioresult/', ioResultRouter);
-app.use('/user/', userRouter);
 app.use('/image/', imageRouter);
 
 
