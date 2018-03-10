@@ -1,26 +1,25 @@
-'use strict;' //strict compiler mode. see main.js
+'use strict;' // strict compiler mode. see main.js
 
-//import ORM Object
+// import ORM Object
 const Model = reqlib('/api/model/model').Models
-const IOResult = Model.IOResult;
+const IOResult = Model.IOResult
 
 const allowedFields = ['id', 'createdAt', 'identifier', 'action', 'action', 'arguments', 'value']
 
-async function getIOResult(req, res, next) {
-    //find by id
+async function getIOResult (req, res, next) {
+    // find by id
     const result = await IOResult.findById(req.params.id, {
-        attributes: allowedFields 
-    });
-    //if there is result with the given id
+        attributes: allowedFields
+    })
+    // if there is result with the given id
     if (result) {
-        //return it
-        res.jsonSuccess(result);
+        // return it
+        res.jsonSuccess(result)
     } else {
-        return next("no IOResult with the given id found.");
+        return next('no IOResult with the given id found.')
     }
-
 }
 
 module.exports = {
-    get: getIOResult,
+    get: getIOResult
 }
