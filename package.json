@@ -8,6 +8,17 @@
     "start": "nodemon main.js",
     "pm2": "pm2 start main.js --name labor-api"
   },
+  "eslintConfig": {
+    "rules": {
+      "indent": [
+        "error",
+        4
+      ]
+    }
+  },
+  "standardx": {
+    "globals": ["log", "reqlib", "stringify","config"]
+  },
   "author": "Malte Bargholz",
   "license": "MIT",
   "dependencies": {
