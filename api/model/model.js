@@ -41,7 +41,7 @@ module.exports = {
 
 // sync the database (meaning creating the tables if not existent)
 db.sync({
-    force: config.development
+    force: config.development || config.forceDatabaseSync
 })
     .then(() => log.info('db succesfully synced'))
     .catch((error) => log.error('db sync failed with error: ' + stringify(error)))
