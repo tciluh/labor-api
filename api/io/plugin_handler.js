@@ -6,6 +6,14 @@ const path = require('path')
 const IOResult = Model.IOResult
 const IOAction = Model.IOAction
 
+class IOActionError {
+    constructor (msg, actionId, resultId = null) {
+        this.msg = msg
+        this.actionId = actionId
+        this.resultId = resultId
+    }
+}
+
 class IOPluginManager {
     constructor (io, pluginDir) {
         this.io = io
@@ -59,8 +67,9 @@ class IOPluginManager {
         socket.on('action', (actionId, ackFn) => {
             // socket is now bound to this
             self.handleAction(self, socket, actionId, ackFn)
-                .then(() => {
+                .then(({ result, id }) => {
                     log.info(`action with id: ${actionId} succesfully handled`)
+                    self.handleResult(socket, result, id)
                 })
                 .catch(error => {
                     self.handleError(error)
@@ -72,65 +81,48 @@ class IOPluginManager {
         log.info(`client disconnected for reason: ${reason}`)
     }
 
-    handleError (error) {
-        log.error(`handle error: ${error}`)
-        log.error(stringify(error))
+    handleResult (socket, result, resultId) {
+        log.info(`returning result: ${result} with id: ${resultId}`)
+        socket.emit('result', {
+            result: result,
+            id: resultId
+        })
     }
 
-    async handleAction (self, socket, actionId, ackFn) {
+    handleError (socket, error) {
+        if (error instanceof IOActionError) {
+            log.error(`handling action error: ${error.msg} for id: ${error.actionId}, rid: ${error.resultId}`)
+            socket.emit('action error', {
+                error: error.msg,
+                actionId: error.actionId,
+                resultId: error.resultId
+            })
+        } else {
+            log.error(`unknown error while processing ioaction request.\n`)
+        }
+    }
+
+    async handleAction (self, actionId, ackFn) {
         log.debug(`handle action with id: ${actionId}`)
         // make sure we got a valid actionId
         if (!actionId) {
-            log.warning(`malformed action request on socket: ${socket.id}`)
             log.warning(`actionId: ${actionId} is not valid`)
-            socket.emit('action error', {
-                error: 'invalid action id',
-                actionId: actionId
-            })
         }
         // fetch the related IOAction
         const ioaction = await IOAction.findById(actionId)
-        if (!ioaction) throw new Error(`cant find action with id: ${actionId}`)
+        if (!ioaction) throw new IOActionError(`cant find action`, actionId)
         // define shorthands
         const identifier = ioaction.identifier
         const action = ioaction.action
         const args = ioaction.arguments
         // get the resposible plugin
         const plugin = self.actionMap[identifier]
-        if (plugin) {
-            log.debug(`got plugin: ${stringify(plugin)} for identifier: ${identifier}`)
-            // check if the action is supported by this plugin
-            if (!plugin.actions.includes(action)) {
-                log.warning(`plugin with identifier: ${identifier} does not support action: ${action} (allowed actions: ${stringify(plugin.actions)})`)
-                return socket.emit('action error', {
-                    error: `identifier: ${identifier} does not support action: ${action}`,
-                    actionId: actionId
-                })
-            }
-            // perform the plugin action
-            // this creates an IOResult entry and runs the
-            // plugin handler function
-            try {
-                let obj = await self.performPluginAction(plugin, action, args, ackFn)
-                log.debug(`emitting: ${stringify(obj)} on result channel`)
-                socket.emit('result', obj)
-            } catch (error) {
-                log.error(`plugin threw an error while getting result: ${stringify(error)}`)
-                socket.emit('action error', {
-                    error: error.message,
-                    actionId: actionId
-                })
-            }
-        } else {
-            log.warning(`no plugin found for identifier: ${identifier}`)
-            socket.emit('action error', {
-                error: 'identifier not found',
-                actionId: actionId
-            })
-        }
-    }
+        if (!plugin) throw new IOActionError(`no plugin found for identifier: ${identifier}`, actionId)
 
-    async performPluginAction (plugin, action, args, ackFn) {
+        log.debug(`got plugin: ${stringify(plugin)} for identifier: ${identifier}`)
+        // check if the action is supported by this plugin
+        if (!plugin.actions.includes(action)) { throw new IOActionError(`plugin with identifier: ${identifier} does not support action: ${action} (allowed actions: ${stringify(plugin.actions)})`, actionId) }
+        // perform the plugin action
         // create IOResult entry
         log.debug(`will create IOResult with id: ${plugin.identifier} and action: ${action} and args: ${args}`)
         let result = await IOResult.create({
@@ -138,19 +130,27 @@ class IOPluginManager {
             action: action,
             arguments: args
         })
-        log.debug(`created io result: ${stringify(result)}`)
+        log.debug(`created io result with id: ${result.id}`)
         // return id to the client
+        // anything below this should only throw IOActionErrors
         ackFn(result.id)
-        // call the plugin handler
-        log.debug(`calling plugin handler`)
-        let val = await plugin.handler(action, args)
-        log.debug(`got result: ${val}`)
-        // update the ioresult
-        await result.update({
-            value: val
-        })
-        log.debug(`updated ioresult: ${stringify(result)}`)
-        // return the object to emit on the socket
+
+        try {
+            log.debug(`calling plugin handler`)
+            const val = await plugin.handler(action, args)
+            log.debug(`got result: ${val}`)
+            try {
+                await result.update({
+                    value: val
+                })
+            } catch (error) {
+                throw new IOActionError(`error updating database: ${error}`, actionId, result.id)
+            }
+        } catch (error) {
+            throw new IOActionError(`plugin returned an error: ${error}`, actionId, result.id)
+        }
+
+        log.debug(`updated ioresult (${result.id}) with value: ${result.value}`)
         return {
             id: result.id,
             result: result.value
