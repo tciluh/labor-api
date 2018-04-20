@@ -3,8 +3,8 @@
 // import IOResult from model
 const Model = reqlib('/api/model/model').Models
 const path = require('path')
-const IOResult = model.IOResult
-const IOAction = model.IOAction
+const IOResult = Model.IOResult
+const IOAction = Model.IOAction
 
 class IOPluginManager {
     constructor (io, pluginDir) {
