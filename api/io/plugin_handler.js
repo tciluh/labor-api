@@ -83,7 +83,10 @@ class IOPluginManager {
         if (!actionId) {
             log.warning(`malformed action request on socket: ${socket.id}`)
             log.warning(`actionId: ${actionId} is not valid`)
-            socket.emit('action error', 'malformed action request')
+            socket.emit('action error', {
+                error: 'invalid action id',
+                actionId: actionId
+            })
         }
         // fetch the related IOAction
         const ioaction = await IOAction.findById(actionId)
@@ -100,7 +103,8 @@ class IOPluginManager {
             if (!plugin.actions.includes(action)) {
                 log.warning(`plugin with identifier: ${identifier} does not support action: ${action} (allowed actions: ${stringify(plugin.actions)})`)
                 return socket.emit('action error', {
-                    error: `identifier: ${identifier} does not support action: ${action}`
+                    error: `identifier: ${identifier} does not support action: ${action}`,
+                    actionId: actionId
                 })
             }
             // perform the plugin action
@@ -114,16 +118,14 @@ class IOPluginManager {
                 log.error(`plugin threw an error while getting result: ${stringify(error)}`)
                 socket.emit('action error', {
                     error: error.message,
-                    identifier: identifier,
-                    action: action,
-                    uniqueid: 0,
-                    args: args
+                    actionId: actionId
                 })
             }
         } else {
             log.warning(`no plugin found for identifier: ${identifier}`)
             socket.emit('action error', {
-                error: 'identifier not found'
+                error: 'identifier not found',
+                actionId: actionId
             })
         }
     }
