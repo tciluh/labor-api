@@ -1,7 +1,7 @@
 'use strict;'
 
 // import IOResult from model
-const model = reqlib('/api/model/model')
+const Model = reqlib('/api/model/model').Models
 const path = require('path')
 const IOResult = model.IOResult
 const IOAction = model.IOAction
