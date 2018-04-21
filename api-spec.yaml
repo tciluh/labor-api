@@ -362,6 +362,35 @@ definitions:
         description: One or more outcomes of this instruction represented by Result objects.
         items:
           $ref: '#/definitions/Result'
+      actions:
+        type: array
+        description: Any measurements that should be done in this instruciton
+        items:
+          $ref: '#/definitions/IOAction'
+  IOAction:
+    type: object
+    required:
+    - id
+    - identifier
+    - action
+    - arguments
+    description: The database object representing a measurement action
+    properties:
+      id:
+        type: integer
+        description: The unique id of this IOAction
+      identifier:
+        type: string
+        description: the name of the plugin that is responsible for this action
+      action:
+        type: string
+        description: a string indicating which feature of the plugin should be executed
+      arguments:
+        type: object
+        description: a json object containing any additional arguments to pass to the plugin
+      equationIdentifier:
+        type: string
+        description: a string that can be used to access results of this measurement in equation instructions.
   Protocol:
     type: object
     properties:
