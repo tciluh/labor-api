@@ -66,13 +66,13 @@ class IOPluginManager {
         const self = this
         socket.on('action', (actionId, ackFn) => {
             // socket is now bound to this
-            self.handleAction(self, socket, actionId, ackFn)
+            self.handleAction(self, actionId, ackFn)
                 .then(({ result, id }) => {
                     log.info(`action with id: ${actionId} succesfully handled`)
                     self.handleResult(socket, result, id)
                 })
                 .catch(error => {
-                    self.handleError(error)
+                    self.handleError(socket, error)
                 })
         })
     }
@@ -98,7 +98,8 @@ class IOPluginManager {
                 resultId: error.resultId
             })
         } else {
-            log.error(`unknown error while processing ioaction request.\n`)
+            log.error(`unknown error while processing ioaction request.`)
+            log.error(error)
         }
     }
 
@@ -119,7 +120,6 @@ class IOPluginManager {
         const plugin = self.actionMap[identifier]
         if (!plugin) throw new IOActionError(`no plugin found for identifier: ${identifier}`, actionId)
 
-        log.debug(`got plugin: ${stringify(plugin)} for identifier: ${identifier}`)
         // check if the action is supported by this plugin
         if (!plugin.actions.includes(action)) { throw new IOActionError(`plugin with identifier: ${identifier} does not support action: ${action} (allowed actions: ${stringify(plugin.actions)})`, actionId) }
         // perform the plugin action

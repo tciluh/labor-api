@@ -1,5 +1,8 @@
 const PluginBase = require('../base');
 const SerialPort = require('serialport');
+const util = require('util');
+
+let port;
 
 class Photometer extends PluginBase{
     constructor(){
@@ -12,7 +15,7 @@ class Photometer extends PluginBase{
         ];
         const serialportPath = '/dev/ttyUSB0'
         const serial = new SerialPort(serialportPath, {
-            autoOpen: false,
+            autoOpen: true,
             baudRate: 19200,
             dataBits: 8,
             stopBits: 1,
@@ -24,23 +27,24 @@ class Photometer extends PluginBase{
             acc[elem] = this[elem];
             return acc;
         }, {});
-        this.port = serial;
+        port = serial;
 
     }
-    async handler(action, args){
-        if(!this.port.isOpen) {
-            await util.promisify(this.port.open.bind(port))();
-            //make sure that the port is ready to accept connections
-            await this.port.write('\r\n\r\n');
+    handler(action, args){
+        return new Promise((resolve, reject) => {
+            port.write('\r\n\r\n');
             //beep once to signal ready
-            await this.port.write('\r\nBEEP\r\n');
-        }
-        return await this.handlerMap[action](args);
+            port.write('\r\nBEEP\r\n');
+            port.drain()
+            this.handlerMap[action](args)
+                .then(result => resolve(result))
+                .catch(error => reject(error))
+        })
     }
 
-    async setTurret(args) {
-        const pos = args.position;
-        if(pos.toUpperCase() == 'B' || pos.toUpperCase() == 'BLANK') {
+    setTurret(args) {
+        let pos = args.position;
+        if(pos instanceof String  && (pos.toUpperCase() == 'B' || pos.toUpperCase() == 'BLANK')) {
             //BLANK position == Position 0
             pos = 0; 
         }
@@ -53,11 +57,16 @@ class Photometer extends PluginBase{
         if(pos < 0 || pos > 5) {
            throw new Error(`turret position ${pos} is out-of-bounds`);
         } 
-        await this.port.write(`TURRET ${pos}\r\n`);
+        return new Promise((resolve, reject) => {
+            port.write(`\r\nTURRET ${pos}\r\n`, 'ascii', (error) => {
+                if(error) reject(error)
+                resolve()
+            });
+        })
     }
 
-    async setWavelength(args) {
-        const wl = args.wavelength;
+    setWavelength(args) {
+        let wl = args.wavelength;
         if(!(wl instanceof Number)){
             wl = Number.parseInt(wl);
         }
@@ -67,19 +76,43 @@ class Photometer extends PluginBase{
         if(wl < 190 || wl > 1100) {
             throw new Error(`wavelength ${wl} is out-of-bounds`);
         }
-        await this.port.write(`GOTO ${wl}\r\n`);
+        return new Promise((resolve, reject) => {
+            port.write(`\r\nGOTO ${wl}\r\n`, 'ascii', (error) => {
+                if(error) reject(error)
+                resolve()
+            });
+        })
     }
 
-    async zero(args) {
-        await this.port.write(`ZERO\r\n`);
+    zero(args) {
+        return new Promise((resolve, reject) => {
+            port.write(`\r\nZERO\r\n`, 'ascii', (error) => {
+                if(error) reject(error)
+                resolve()
+            });
+        })
     }
 
-    async measure(args) {
-        await util.promisify(this.port.flush.bind(port))();
-        await this.port.write(`SAMPLE`);
-        let buffer = new Buffer.alloc(20);
-        let bytesRead = await this.port.read(buffer, 0, 20)
-        return buffer.toString('ascii');
+    measure(args) {
+        return new Promise((resolve, reject) => {
+            port.flush((error) => {
+                if(error) reject(error)
+                port.on('data', (data) => {
+                    if(!data) return;
+                    const string = data.toString()
+                    log.error(`recieved: ${data}`);
+                    if(data.toString('ascii').includes('A') && !data.toString('ascii').includes('SAMPLE')){
+                        const string = data.toString('ascii')
+                            .replace('A', '')
+                            .trim()
+                        resolve(string.substr(0, string.indexOf("\n")))
+                    }
+                })
+                port.write('\r\nSAMPLE\r\n', 'ascii', (error) => {
+                    if(error) reject(error)
+                })	
+            })
+        })
     }
 }
 
