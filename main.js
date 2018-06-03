@@ -25,7 +25,7 @@ nconf.argv()
     .defaults({
         host: '0.0.0.0',
         port: 3000,
-	forceDatabaseSync: false,
+        forceDatabaseSync: false,
         development: true,
         dbhost: 'localhost',
         dbname: 'labor-api',
