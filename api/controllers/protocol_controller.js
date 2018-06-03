@@ -27,7 +27,7 @@ const findOptions = {
             {
                 model: IOAction,
                 as: 'actions',
-                attributes: ['id', 'identifier', 'action', 'arguments', 'equationIdentifier']
+                attributes: ['id', 'plugin', 'humanReadableName', 'action', 'arguments', 'equationIdentifier']
             }
         ]
     }]
@@ -122,12 +122,12 @@ async function addProtocol (req, res, next) {
                 // create each action
                 let createdActions = []
                 for (let action of input.actions) {
-                    log.debug(`creating IOAction from input: ${action}`)
+                    log.debug(`creating IOAction from input: ${stringify(action)}`)
                     let createdAction = await IOAction.create(action, {
-                        fields: ['identifier', 'action', 'arguments', 'equationIdentifier'],
+                        fields: ['plugin', 'humanReadableName', 'action', 'arguments', 'equationIdentifier'],
                         transaction: t
                     })
-                    log.debug(`created IOAction: ${createdAction}`)
+                    log.debug(`created IOAction: ${stringify(createdAction)}`)
                     createdActions.push(createdAction)
                 }
                 // add to instruction

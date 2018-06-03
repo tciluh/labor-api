@@ -3,7 +3,7 @@ module.exports.create = (sequelize, db) => {
     // A Table which contains all IOPlugin Steps associated with an Instruction
     return db.define('ioaction',
         {
-            identifier: {
+            plugin: {
                 type: sequelize.STRING,
                 validate: {
                     notEmpty: true
@@ -14,6 +14,13 @@ module.exports.create = (sequelize, db) => {
                 type: sequelize.STRING,
                 validate: {
                     notEmpty: true
+                },
+                allowNull: false
+            },
+            humanReadableName: {
+                type: sequelize.STRING,
+                validate: {
+                    notEmpty: true 
                 },
                 allowNull: false
             },
