@@ -113,7 +113,7 @@ class IOPluginManager {
         const ioaction = await IOAction.findById(actionId)
         if (!ioaction) throw new IOActionError(`cant find action`, actionId)
         // define shorthands
-        const identifier = ioaction.identifier
+        const identifier = ioaction.plugin
         const action = ioaction.action
         const args = ioaction.arguments
         // get the resposible plugin
