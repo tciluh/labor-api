@@ -147,6 +147,8 @@ class IOPluginManager {
                 throw new IOActionError(`error updating database: ${error}`, actionId, result.id)
             }
         } catch (error) {
+            log.error('plugin error: ', error)
+            log.error(error.stack)
             throw new IOActionError(`plugin returned an error: ${error}`, actionId, result.id)
         }
 
