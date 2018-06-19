@@ -24,6 +24,13 @@ module.exports.create = (sequelize, db) => {
                 },
                 allowNull: false
             },
+            unit: {
+                type: sequelize.STRING,
+                allowNull: true,
+                validate: {
+                    notEmpty: true 
+                }
+            },
             arguments: {
                 type: sequelize.JSON,
                 allowNull: true
